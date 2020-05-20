@@ -1,0 +1,183 @@
+AGI_code	Gene_Name	Gene_Model	SNP	Allele	Col-0	Change	From	To
+AT1G01700	"Encodes a member of KPP-like gene family, homolog of KPP (kinase partner protein) gene in tomato"	AT1G01700.1	m465	G/C	G	True	R	G
+AT1G01700	"Encodes a member of KPP-like gene family, homolog of KPP (kinase partner protein) gene in tomato"	AT1G01700.1	m466	C/A	C	True	A	S
+AT1G01700	"Encodes a member of KPP-like gene family, homolog of KPP (kinase partner protein) gene in tomato"	AT1G01700.1	m467	T/A	T	False	.	.
+AT1G01700	"Encodes a member of KPP-like gene family, homolog of KPP (kinase partner protein) gene in tomato"	AT1G01700.1	m468	A/G	A	False	.	.
+AT1G01700	"Encodes a member of KPP-like gene family, homolog of KPP (kinase partner protein) gene in tomato"	AT1G01700.1	m469	C/A	C	True	G	V
+AT1G76470	3-beta-hydroxy-delta5-steroid dehydrogenase/ binding / catalytic/ cinnamoyl-CoA reductase	AT1G76470.1	m49184	C/T	C	True	D	N
+AT1G76470	3-beta-hydroxy-delta5-steroid dehydrogenase/ binding / catalytic/ cinnamoyl-CoA reductase	AT1G76470.1	m49185	C/G	G	True	T	R
+AT1G76470	3-beta-hydroxy-delta5-steroid dehydrogenase/ binding / catalytic/ cinnamoyl-CoA reductase	AT1G76470.1	m49186	G/A	A	False	.	.
+AT1G76470	3-beta-hydroxy-delta5-steroid dehydrogenase/ binding / catalytic/ cinnamoyl-CoA reductase	AT1G76470.1	m49187	G/C	G	True	L	V
+AT1G76470	3-beta-hydroxy-delta5-steroid dehydrogenase/ binding / catalytic/ cinnamoyl-CoA reductase	AT1G76470.1	m49188	T/C	C	False	.	.
+AT5G53810	"O-methyltransferase, putative"	AT5G53810.1	m204988	G/C	G	True	Q	E
+AT5G53810	"O-methyltransferase, putative"	AT5G53810.1	m204989	A/G	G	True	A	V
+AT4G35420	dihydroflavonol 4-reductase family / dihydrokaempferol 4-reductase family	AT4G35420.1	m158066	T/G	T	False	.	.
+AT4G35420	dihydroflavonol 4-reductase family / dihydrokaempferol 4-reductase family	AT4G35420.1	m158067	C/G	C	False	.	.
+AT4G35420	dihydroflavonol 4-reductase family / dihydrokaempferol 4-reductase family	AT4G35420.1	m158068	T/A	T	True	K	N
+AT4G35420	dihydroflavonol 4-reductase family / dihydrokaempferol 4-reductase family	AT4G35420.1	m158069	T/C	C	False	.	.
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189333	A/C	A	False	.	.
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189334	G/C	G	False	.	.
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189335	G/A	G	True	A	T
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189336	C/G	C	True	Q	E
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189337	A/G	A	True	I	V
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189338	A/T	A	False	.	.
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189339	A/G	A	True	N	D
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189340	T/C	T	False	.	.
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189341	T/C	T	False	.	.
+AT5G38120	lignin biosynthesis.4CL/transferase family protein	AT5G38120.1	m189342	G/A	G	False	.	.
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189352	T/C	T	True	D	G
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189353	T/A	T	True	E	D
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189354	C/T	C	True	G	E
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189355	C/T	C	False	.	.
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189356	A/G	A	False	.	.
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189357	A/G	A	False	.	.
+AT5G38130	lignin biosynthesis.4CL/transferase family protein	AT5G38130.1	m189358	T/A	T	False	.	.
+AT5G01190	"putative laccase, a member of laccase family of genes (17 members in Arabidopsis)."	AT5G01190.1	m160968	A/C	C	True	P	Q
+AT5G01190	"putative laccase, a member of laccase family of genes (17 members in Arabidopsis)."	AT5G01190.1	m160969	A/T	A	False	.	.
+AT5G01190	"putative laccase, a member of laccase family of genes (17 members in Arabidopsis)."	AT5G01190.1	m160970	C/T	T	True	F	L
+AT5G01190	"putative laccase, a member of laccase family of genes (17 members in Arabidopsis)."	AT5G01190.1	m160971	T/G	G	True	R	L
+AT5G01190	"putative laccase, a member of laccase family of genes (17 members in Arabidopsis)."	AT5G01190.1	m160972	G/A	A	False	.	.
+AT2G29340	short-chain dehydrogenase/reductase (SDR) family protein	AT2G29340.2	m70526	C/T	C	False	.	.
+AT2G29340	short-chain dehydrogenase/reductase (SDR) family protein	AT2G29340.1	m70526	C/T	C	False	.	.
+AT2G29340	short-chain dehydrogenase/reductase (SDR) family protein	AT2G29340.3	m70526	C/T	C	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.2	m178638	C/T	C	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.2	m178639	C/G	C	True	G	A
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.2	m178640	A/G	A	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.2	m178641	A/T	T	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.2	m178642	T/A	A	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.1	m178638	C/T	C	True	V	I
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.1	m178639	C/G	C	True	G	A
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.1	m178640	A/G	A	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.1	m178641	A/T	T	False	.	.
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"	AT5G26000.1	m178642	T/A	A	False	.	.
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"	AT5G66690.1	m213391	A/G	A	False	.	.
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"	AT5G66690.1	m213392	A/G	G	False	.	.
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"	AT5G66690.1	m213393	G/A	A	False	.	.
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"	AT5G66690.1	m213394	G/T	G	True	G	C
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"	AT5G66690.1	m213395	G/C	G	True	S	T
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"	AT5G66690.1	m213396	A/C	A	False	.	.
+AT3G29670	HXXXD-type acyl-transferase family protein	AT3G29670.1	m102347	C/G	C	False	.	.
+AT3G29670	HXXXD-type acyl-transferase family protein	AT3G29670.1	m102349	G/A	G	False	.	.
+AT3G29670	HXXXD-type acyl-transferase family protein	AT3G29670.1	m102350	C/A	A	False	.	.
+AT3G29670	HXXXD-type acyl-transferase family protein	AT3G29670.1	m102351	A/G	G	False	.	.
+AT3G29670	HXXXD-type acyl-transferase family protein	AT3G29670.1	m102353	T/G	G	False	.	.
+AT5G48930	hydroxycinnamoyl-CoA shikimate/quinate hydroxycinnamoyl transferase	AT5G48930.1	m201122	T/G	G	False	.	.
+AT5G48930	hydroxycinnamoyl-CoA shikimate/quinate hydroxycinnamoyl transferase	AT5G48930.1	m201123	A/G	A	False	.	.
+AT5G48930	hydroxycinnamoyl-CoA shikimate/quinate hydroxycinnamoyl transferase	AT5G48930.1	m201124	A/C	C	False	.	.
+AT5G48930	hydroxycinnamoyl-CoA shikimate/quinate hydroxycinnamoyl transferase	AT5G48930.1	m201125	G/A	A	False	.	.
+AT5G48930	hydroxycinnamoyl-CoA shikimate/quinate hydroxycinnamoyl transferase	AT5G48930.1	m201126	A/C	A	False	.	.
+AT5G05260	Encodes cytochrome P450 CYP79A2.	AT5G05260.1	m163923	G/A	G	True	P	L
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36929	A/G	A	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36930	G/C	G	True	E	Q
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36931	A/G	A	True	R	G
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36933	T/C	T	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36934	T/G	T	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36935	G/T	G	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36936	G/A	G	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36937	A/G	A	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36938	C/T	C	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36939	C/G	G	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36940	T/C	C	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36941	A/C	A	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36942	A/G	G	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36943	G/C	G	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36944	T/C	T	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36946	G/T	G	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36947	C/T	T	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36948	T/A	A	True	M	L
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36949	T/C	C	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36950	C/T	T	False	.	.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"	AT1G61120.1	m36951	C/T	C	True	P	L
+AT4G27250	NAD(P)-binding Rossmann-fold superfamily protein	AT4G27250.1	m153213	C/T	C	False	.	.
+AT4G27250	NAD(P)-binding Rossmann-fold superfamily protein	AT4G27250.1	m153214	A/G	A	False	.	.
+AT4G27250	NAD(P)-binding Rossmann-fold superfamily protein	AT4G27250.1	m153215	C/A	C	True	R	L
+AT4G27250	NAD(P)-binding Rossmann-fold superfamily protein	AT4G27250.1	m153216	G/T	G	False	.	.
+AT4G16330	oxidoreductase/ oxidoreductase	AT4G16330.1	m143842	A/C	A	False	.	.
+AT3G29630	glycosyltransferase family protein	AT3G29630.1	m102186	G/A	G	False	.	.
+AT3G29630	glycosyltransferase family protein	AT3G29630.1	m102188	A/G	A	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116319	C/T	T	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116320	T/C	C	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116321	G/A	A	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116322	T/A	A	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116323	A/G	G	True	D	N
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116324	C/A	A	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116325	T/C	C	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116326	C/T	T	False	.	.
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116327	C/A	A	True	D	A
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.	AT3G51240.1	m116328	C/G	G	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.2	m93846	C/T	C	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.2	m93847	T/C	T	True	T	A
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.2	m93848	T/C	T	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.2	m93849	G/A	A	True	C	R
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.2	m93850	A/G	A	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.2	m93851	A/G	G	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.1	m93846	C/T	C	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.1	m93847	T/C	T	True	T	A
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.1	m93848	T/C	T	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.1	m93849	G/A	A	True	C	R
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.1	m93850	A/G	A	False	.	.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.	AT3G21500.1	m93851	A/G	G	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35921	G/T	G	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35922	A/G	G	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35923	C/T	C	True	E	K
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35924	C/A	C	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35925	A/G	A	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35926	T/A	T	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35927	G/T	G	False	.	.
+AT1G59960	"aldo/keto reductase, putative"	AT1G59960.1	m35928	A/G	A	False	.	.
+AT3G50300	transferase family protein	AT3G50300.1	m115636	C/T	C	False	.	.
+AT3G50300	transferase family protein	AT3G50300.1	m115637	G/C	G	False	.	.
+AT3G50300	transferase family protein	AT3G50300.1	m115638	G/A	G	True	A	T
+AT3G50300	transferase family protein	AT3G50300.1	m115639	A/G	A	False	.	.
+AT3G50300	transferase family protein	AT3G50300.1	m115640	C/G	C	True	L	V
+AT3G50300	transferase family protein	AT3G50300.1	m115641	C/T	C	False	.	.
+AT3G50300	transferase family protein	AT3G50300.1	m115642	C/A	C	False	.	.
+AT3G50300	transferase family protein	AT3G50300.1	m115643	T/C	C	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207743	T/A	T	True	M	L
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207744	A/G	A	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207745	G/A	G	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207746	G/A	A	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207747	A/C	A	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207748	C/T	T	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207749	G/C	G	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207750	C/T	C	False	.	.
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207751	T/C	T	True	N	D
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)	AT5G57840.1	m207752	C/A	C	False	.	.
+AT1G51470	BETA GLUCOSIDASE 35 (BGLU35)	AT1G51470.1	m31160	A/G	A	False	.	.
+AT1G51470	BETA GLUCOSIDASE 35 (BGLU35)	AT1G51470.1	m31161	T/G	T	False	.	.
+AT1G51470	BETA GLUCOSIDASE 35 (BGLU35)	AT1G51470.1	m31162	G/T	G	False	.	.
+AT1G51470	BETA GLUCOSIDASE 35 (BGLU35)	AT1G51470.1	m31163	T/C	T	False	.	.
+AT1G78510	Encodes a protein with solanesyl diphosphate synthase activity.	AT1G78510.1	m50331	C/G	G	True	T	S
+AT1G78510	Encodes a protein with solanesyl diphosphate synthase activity.	AT1G78510.2	m50331	C/G	G	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20045	A/T	A	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20046	T/C	T	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20047	C/A	C	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20048	C/A	A	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20049	G/A	G	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20050	C/T	C	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20051	G/A	A	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20052	C/T	C	True	S	F
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20053	C/T	C	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20054	G/A	A	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20055	G/A	A	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20056	A/C	C	True	A	D
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20057	G/A	A	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20058	G/A	A	True	K	E
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20059	A/T	T	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20060	C/T	T	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20061	T/C	T	False	.	.
+AT1G31910	GHMP kinase family protein	AT1G31910.1	m20062	C/T	C	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140349	C/T	T	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140350	C/T	C	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140351	T/G	T	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140352	A/C	A	True	S	R
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140353	A/T	A	True	K	M
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140354	C/T	C	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140355	C/T	C	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140356	A/C	A	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140357	C/A	C	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140358	T/C	T	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140359	T/G	T	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140360	C/T	T	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140361	G/A	A	False	.	.
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.	AT4G13660.1	m140362	A/T	T	False	.	.

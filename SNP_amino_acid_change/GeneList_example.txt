@@ -1,0 +1,29 @@
+AGI_code	GeneName
+AT1G01700	"Encodes a member of KPP-like gene family, homolog of KPP (kinase partner protein) gene in tomato"
+AT1G76470	3-beta-hydroxy-delta5-steroid dehydrogenase/ binding / catalytic/ cinnamoyl-CoA reductase
+AT5G53810	"O-methyltransferase, putative"
+AT4G35420	dihydroflavonol 4-reductase family / dihydrokaempferol 4-reductase family
+AT5G38120	lignin biosynthesis.4CL/transferase family protein
+AT5G38130	lignin biosynthesis.4CL/transferase family protein
+AT5G01190	"putative laccase, a member of laccase family of genes (17 members in Arabidopsis)."
+AT2G29340	short-chain dehydrogenase/reductase (SDR) family protein
+AT5G26000	"TGG1 (THIOGLUCOSIDE GLUCOHYDROLASE 1); hydrolase, hydrolyzing O-glycosyl compounds / thioglucosidase"
+AT5G66690	"UGT72E2; UDP-glycosyltransferase/ coniferyl-alcohol glucosyltransferase/ transferase, transferring glycosyl groups"
+AT3G29670	HXXXD-type acyl-transferase family protein
+AT5G48930	hydroxycinnamoyl-CoA shikimate/quinate hydroxycinnamoyl transferase
+AT5G05260	Encodes cytochrome P450 CYP79A2.
+AT1G61120	"Encodes a geranyllinalool synthase that produces a precursor to TMTT, a volatile plant defense C16-homoterpene"
+AT4G27250	NAD(P)-binding Rossmann-fold superfamily protein
+AT4G16330	oxidoreductase/ oxidoreductase
+AT3G29630	glycosyltransferase family protein
+AT3G51240	Encodes flavanone 3-hydroxylase that is coordinately expressed with chalcone synthase and chalcone isomerases. Regulates flavonoid biosynthesis.
+AT3G21500	Encodes a protein postulated to have 1-deoxy-D-xylulose 5-phosphate synthase activity.
+AT1G59960	"aldo/keto reductase, putative"
+AT3G50300	transferase family protein
+AT5G57840	encodes a protein whose sequence is similar to anthranilate N-hydroxycinnamoyl/benzoyltransferase from Dianthus caryophyllus (gi:2239091)
+AT1G51470	BETA GLUCOSIDASE 35 (BGLU35)
+AT1G78510	Encodes a protein with solanesyl diphosphate synthase activity.
+AT1G31910	GHMP kinase family protein
+AT4G13660	Encodes a pinoresinol reductase involved in lignan biosynthesis. Expressed strongly in roots and less strongly in stems. Shows preference for pinoresinol and not lariciresinol.
+AT1G16410	CYP79F1
+AT3G55710	UDP-Glycosyltransferase superfamily protein
