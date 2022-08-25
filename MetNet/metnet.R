@@ -1,3 +1,6 @@
+## load package
+library(MetNet)
+
 ## load data sets
 setwd("~/01_GWAS/00_MetNet")
 peaklist_neg1 <- read.table("rep1_negative_match.csv", sep = "\t", dec = ".", stringsAsFactors = FALSE, header = TRUE)
@@ -132,18 +135,17 @@ transformations_neg <- data.frame(
   mass = c(as.numeric(adducts_neg[, 3]), as.numeric(transformations[, 3])),
   rt = c(adducts_neg[, 4], transformations[, 4]))
 
-## use function createStructuralAdjacency and remove false positives by 
-## function rtCorrection
+## use function structural and remove false positives by function rtCorrection
 ## pos
-struct_adj_pos <- structural(x = pl_pos, 
-    transformation = transformations_pos, ppm = 10, directed = TRUE)
-struct_adj_pos <- rtCorrection(structural = struct_adj_pos, x = pl_pos, 
-    transformation = transformations_pos)
+struct_adj_pos <- structural(x = pl_pos, transformation = transformations_pos, 
+    var = c("group", "mass", "rt"), ppm = 10, directed = TRUE)
+struct_adj_pos <- rtCorrection(am = struct_adj_pos, x = pl_pos, 
+    transformation = transformations_pos, var = "group")
 ## neg
-struct_adj_neg <- structural(x = pl_neg, 
-    transformation = transformations_neg, ppm = 10, directed = TRUE)
-struct_adj_neg <- rtCorrection(structural = struct_adj_neg, x = pl_neg,
-    transformation = transformations_neg)
+struct_adj_neg <- structural(x = pl_neg, transformation = transformations_neg, 
+    var = c("group", "mass", "rt"), ppm = 10, directed = TRUE)
+struct_adj_neg <- rtCorrection(am = struct_adj_neg, x = pl_neg,
+    transformation = transformations_neg, var = "group")
 
 rownames(struct_adj_neg[[1]]) <- colnames(struct_adj_neg[[1]]) <- peaklist_neg1[, "Name"]
 rownames(struct_adj_neg[[2]]) <- colnames(struct_adj_neg[[2]]) <- peaklist_neg1[, "Name"]
