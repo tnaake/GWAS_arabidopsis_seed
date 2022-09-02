@@ -110,7 +110,7 @@ anFA_neg_rep2 <- findAdducts(anIC_neg_rep2, polarity = "negative")
 pl_neg_rep2 <- getPeaklist(anFA_neg_rep2)
 save("an_neg_rep2", "anF_neg_rep2", "anI_neg_rep2", "anIC_neg_rep2", 
     "anFA_neg_rep2", "pl_neg_rep2", 
-    file = "./TDNA_replicate2 _neg_CAMERA.RData")
+    file = "./TDNA_replicate2_neg_CAMERA.RData")
 
-write.table(pl_neg, file = "TDNA_replicate2_neg_peaklist.txt", sep = "\t",
+write.table(pl_neg_rep2, file = "TDNA_replicate2_neg_peaklist.txt", sep = "\t",
             dec = ".", row.names = FALSE, quote = FALSE)
