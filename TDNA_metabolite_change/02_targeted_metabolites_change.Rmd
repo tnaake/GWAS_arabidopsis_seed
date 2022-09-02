@@ -6,13 +6,13 @@ fig_width: 15
 fig_height: 10
 output: 
     html_document:
-    toc: true
-toc_depth: 3
-toc_float: TRUE
-theme: united
-number_sections: true
-highlight: tango
-self_contained: no
+        toc: true
+        theme: united
+        toc_depth: 3
+        toc_float: TRUE
+        number_sections: true
+        highlight: tango
+        self_contained: no
 ---
     
 ```{r setup, include=FALSE}
@@ -31,117 +31,6 @@ get_metabolite <- function(pl, mz, rt) {
     rt <- rt * 60
     pl[pl[, "mz"] < mz + 0.01 & pl[, "mz"] > mz - 0.01 &
            pl[, "rt"] < rt + 60 & pl[, "rt"] > rt - 60, ] 
-}
-
-## create function to perform t-test
-perform_ttest <- function(pl, line, n = 20, alternative = "two.sided") {
-    
-    ## add _ to line (to circumvent selection of the column of line that shows
-    ## number of detected compounds)
-    line <- paste(line, "_", sep = "")
-    
-    ## retrieve the columns that contain the intensitities
-    col0 <- pl[, grep(colnames(pl), pattern = "Col_0_")]
-    SALK_line <- pl[, grep(colnames(pl), pattern = line)]
-    
-    ## define the other lines (remove the line itself and the line on the same
-    ## gene, if applicable)
-    if (line == "SALK_008908_3_")
-        other_lines <- c("SALK_011180_5", "SALK_020876_4", "SALK_021216_4", 
-            "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", 
-            "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2", 
-            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_011180_5_")
-        other_lines <- c("SALK_008908_3", "SALK_020876_4", "SALK_024438_5", 
-            "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
-            "SALK_081021_6", "SALK_201809C_2", "SALK_203337C_2", 
-            "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_020876_4_")   
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_021216_4", 
-            "SALK_024438_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
-            "SALK_201809C_2", "SALK_203337C_2", "SALK_203919C_2",
-            "SALK_204674C_3")
-    
-    if (line == "SALK_021216_4_")
-        other_lines <- c("SALK_008908_3", "SALK_020876_4", "SALK_024438_5", 
-            "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
-            "SALK_081021_6", "SALK_201809C_2", "SALK_203337C_2", 
-            "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_024438_5_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", 
-            "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2",   
-            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_027837_5_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_021216_4", 
-            "SALK_024438_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
-            "SALK_201809C_2", "SALK_203337C_2", "SALK_203919C_2", 
-            "SALK_204674C_3")
-    
-    if (line == "SALK_037430_4_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_049338_4", 
-            "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2",   
-            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_049338_4_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_072964_5", 
-            "SALK_081021_6", "SALK_201809C_2", "SALK_203337C_2", 
-            "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_072964_5_")  
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
-            "SALK_049338_4", "SALK_081021_6", "SALK_201809C_2",   
-            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
-    
-    if (line == "SALK_081021_6_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_021216_4", 
-            "SALK_024438_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5",
-            "SALK_201809C_2", "SALK_203337C_2", "SALK_203919C_2", 
-            "SALK_204674C_3")
-    
-    if (line == "SALK_201809C_2_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
-            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_204674C_3")
-    
-    if (line == "SALK_203337C_2_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
-            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_204674C_3")
-    
-    if (line == "SALK_203919C_2_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
-            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_204674C_3")
-    
-    if (line == "SALK_204674C_3_")
-        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
-            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
-            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2",   
-            "SALK_203337C_2", "SALK_203919C_2",)
-    
-    other_lines <- paste(other_lines, "_", sep = "")
-    other_lines <- paste(other_lines, collapse = "|")
-    other_SALK_lines <- pl[, grep(colnames(pl), pattern = other_lines)]
-    
-    ## perform the tests
-    t_col0 <- t.test(x = col0, y = SALK_line, 
-        alternative = alternative)
-    p_col0 <- p.adjust(t_col0$p.value, method = "BH", n = n)
-    t_SALK <- t.test(x = other_SALK_lines, y = SALK_line, 
-        alternative = alternative)
-    p_SALK <- p.adjust(t_SALK$p.value, method = "BH", n = n)
-    
-    ## return the elements
-    list(ttest_Col0 = t_col0, adj_p_Col0 = p_col0,
-         ttest_SALK_lines = t_SALK, adj_p_SALK_lines = p_SALK)
 }
 ```
 
@@ -183,7 +72,7 @@ colnames(rep1) <- gsub(colnames(rep1), pattern = "_neg", replacement = "")
 rep1[rep1 == 0] <- NA
 
 ## rep2
-rep2 <- read.table("TDNA_rep2/neg/TDNA_replicate2_neg_peaklist.txt", 
+rep2 <- read.table("TDNA_rep2/neg/raw_number_vial/TDNA_replicate2_neg_peaklist.txt", 
     header = TRUE, sep = "\t")
 colnames(rep2) <- gsub(colnames(rep2), pattern = "_neg", replacement = "")
 rep2[rep2 == 0] <- NA
@@ -192,12 +81,18 @@ rep2[rep2 == 0] <- NA
 Check data quality with `shinyQC`.
 ```{r shinyQC_prep_rep1}
 ## rep1
-cols <- which(colnames(rep1) == "C24_1"):which(colnames(rep1) == "SALK_204674C_3_5")
+cols <- which(colnames(rep1) == "Col_0_1"):which(colnames(rep1) == "SALK_204674C_3_5")
 a <- rep1[, cols] |> as.matrix()
+rows_rem <- apply(a, 1, function(x) sum(is.na(x))) > 120
 rD <- rep1[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
+a <- a[!rows_rem, ]
+rD <- rD[!rows_rem, ]
 cD <- data.frame(name = colnames(rep1)[cols], 
-    genotype = sort(weights_rep1$genotype),
-    injection_number = weights_rep1$injection_vial[order(weights_rep1$genotype)])
+    genotype = colnames(rep1[, cols]),
+    injection_number = weights_rep1$injection_vial[order(
+        weights_rep1$genotype[weights_rep1$genotype %in% colnames(rep1[, cols])])])
+cD$genotype <- unlist(lapply(strsplit(cD$genotype, split = "_"), function(x)
+    paste(x[1], x[2], sep = "_")))
 cD$batch <- ifelse(cD$injection_number < 60, "1", "2")
 se_rep1 <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
 rownames(se_rep1) <- paste("feature", seq_len(nrow(se_rep1)), sep = "_")
@@ -209,13 +104,19 @@ MatrixQCvis::shinyQC(se_rep1)
 
 ```{r shinyQC_prep_rep2}
 ## rep2
-cols <- which(colnames(rep2) == "C24_1"):which(colnames(rep2) == "SALK_204674C_3_5")
+cols <- which(colnames(rep2) == "Col_0_1"):which(colnames(rep2) == "SALK_204674C_3_5")
 a <- rep2[, cols] |> as.matrix()
+rows_rem <- apply(a, 1, function(x) sum(is.na(x))) > 120
 rD <- rep2[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
+a <- a[!rows_rem, ]
+rD <- rD[!rows_rem, ]
 cD <- data.frame(name = colnames(rep2)[cols])
 cD <- data.frame(name = colnames(rep2)[cols], 
-    genotype = sort(weights_rep2$genotype),
-    injection_number = weights_rep2$injection_vial[order(weights_rep2$genotype)])
+    genotype = colnames(rep2[, cols]),
+    injection_number = weights_rep2$number_vial[order( ######################
+        weights_rep2$genotype[weights_rep2$genotype %in% colnames(rep2[, cols])])])
+cD$genotype <- unlist(lapply(strsplit(cD$genotype, split = "_"), function(x)
+    paste(x[1], x[2], sep = "_")))
 cD$batch <- ifelse(cD$injection_number < 66, "1", "2")
 se_rep2 <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
 rownames(se_rep2) <- paste("feature", seq_len(nrow(se_rep2)), sep = "_")
@@ -228,14 +129,16 @@ MatrixQCvis::shinyQC(se_rep2)
 Remove outliers
 ```{r outlier_neg}
 ## rep1
-outlier <- c("SALK_008908_3_14", "SALK_020876_4_4")
+outlier <- c("C24_1", "C24_2", "C24_3", "C24_4", 
+    "SALK_008908_3_14", "SALK_020876_4_4")
 se_rep1 <- MatrixQCvis:::selectSampleSE(se_rep1, selection = outlier, 
     mode = "exclude")
 weights_rep1 <- weights_rep1[!weights_rep1$genotype %in% outlier, ]
 
 ## rep2 
-outlier <- c("SALK_201809C_2_3", "SALK_203919C_2_9", "SALK_081021_6_7", 
-    "SALK_081021_6_6", "SALK_081021_6_5")
+#outlier <- c("SALK_201809C_2_3", "SALK_203919C_2_9", "SALK_081021_6_7", 
+#    "SALK_081021_6_6", "SALK_081021_6_5")
+outlier <- c("C24_1", "C24_2", "C24_3", "C24_4")
 se_rep2 <- MatrixQCvis:::selectSampleSE(se_rep2, selection = outlier, 
     mode = "exclude")
 weights_rep2 <- weights_rep2[!weights_rep2$genotype %in% outlier, ]
@@ -243,10 +146,18 @@ weights_rep2 <- weights_rep2[!weights_rep2$genotype %in% outlier, ]
 
 ```{r transformation_neg, warning = FALSE, message = FALSE}
 ## divide by weight
-assay(se_rep1)[, weights_rep1$genotype] <- sweep(assay(se_rep1)[, weights_rep1$genotype], 
-    MARGIN = 2, STATS = weights_rep1$weight, FUN = "/")
-assay(se_rep2)[, weights_rep2$genotype] <- sweep(assay(se_rep2)[, weights_rep2$genotype], 
-    MARGIN = 2, STATS = weights_rep2$weight, FUN = "/")
+a_n <- MatrixQCvis::normalizeAssay(a = assay(se_rep1), 
+    method = "quantile division", probs = 0.75) 
+se_rep1 <- MatrixQCvis:::updateSE(se = se_rep1, assay = a_n)
+
+a_n <- MatrixQCvis::normalizeAssay(a = assay(se_rep2), 
+    method = "quantile division", probs = 0.75) 
+se_rep2 <- MatrixQCvis:::updateSE(se = se_rep2, assay = a_n)
+
+# assay(se_rep1)[, weights_rep1$genotype] <- sweep(assay(se_rep1)[, weights_rep1$genotype], 
+#     MARGIN = 2, STATS = weights_rep1$weight, FUN = "/")
+# assay(se_rep2)[, weights_rep2$genotype] <- sweep(assay(se_rep2)[, weights_rep2$genotype], 
+#     MARGIN = 2, STATS = weights_rep2$weight, FUN = "/")
 
 ## batch correction
 ## rep1 
@@ -272,8 +183,8 @@ rep2[, colnames(se_rep2)] <- rep2[, colnames(se_rep2)] |>
     imputeAssay(method = "MinDet")
 ```
 
-combine rep1 and rep2
-```{r}
+Combine rep1 and rep2
+```{r, echo = FALSE}
 rt.dev.range <- c(-30, 30)
 mz.dev.range <- c(-0.01, 0.01)
 
@@ -287,8 +198,8 @@ for (i in 1:nrow(rep1)) {
 }
 
 ## obtain values only
-rep1_values <- rep1[, which(colnames(rep1) == "C24_1"):which(colnames(rep1) == "SALK_204674C_3_5")]
-rep2_values <- rep2[, which(colnames(rep2) == "C24_1"):which(colnames(rep2) == "SALK_204674C_3_5")]
+rep1_values <- rep1[, which(colnames(rep1) == "Col_0_1"):which(colnames(rep1) == "SALK_204674C_3_5")]
+rep2_values <- rep2[, which(colnames(rep2) == "Col_0_1"):which(colnames(rep2) == "SALK_204674C_3_5")]
 
 ## convert to matrix
 rep1_values <- as.matrix(rep1_values)
@@ -311,7 +222,7 @@ for (i in 1:length(res)) {
     inds <- res[[i]]
     if (!all(is.na(inds))) {
         if (length(inds) > 1) {
-            cors <- cor(t(rep1_values[rep(i, length(inds)), ]), t(rep2_values[inds, ]))
+            cors <- cor(rep1_values[i, ], t(rep2_values[inds, ]))
             cors <- cors[1, ]
         } else {
             cors <- cor(rep1_values[i, ], rep2_values[inds,])
@@ -344,24 +255,41 @@ rep1_cor <- cbind(rep1_cor, cor = cor_res[!is.na(cor_res)])
 rep2_cor <- cbind(rep2_cor, cor = cor_res[!is.na(cor_res)])
 
 ## add RT deviance 
-rep1_cor <- cbind(rep1_cor, rt_dev = rep1_cor[, "RT"] - rep2_cor[, "RT"])
-rep2_cor <- cbind(rep2_cor, rt_dev = rep1_cor[, "RT"] - rep2_cor[, "RT"])
+rep1_cor <- cbind(rep1_cor, rt_dev = rep1_cor[, "rt"] - rep2_cor[, "rt"])
+rep2_cor <- cbind(rep2_cor, rt_dev = rep1_cor[, "rt"] - rep2_cor[, "rt"])
 
 ## add m/z deviance
 rep1_cor <- cbind(rep1_cor, mz_dev = rep1_cor[, "mz"] - rep2_cor[, "mz"])
 rep2_cor <- cbind(rep2_cor, mz_dev = rep1_cor[, "mz"] - rep2_cor[, "mz"])
 
 
-
-
 ## create function to perform t-test
 #' @param features rownames in rep1 to take for performing t-tests
 #' @param rep1 containing the values and mapping to rep2 in column mapping_rep1_rep2
 #' 
-features <- list(
-     "Cluster_30089/Cluster_061967" = "feature_14164",
-     "Cluster_32016/Cluster_067344" = c("feature_15678", "feature_15679"))
-line <- "SALK_037430_4"
+alternative_hypothesis <- function(fit_rep_n, ttest_rep1, features) {
+    ### for rep1_neg include the information from the rep1 (one-sided t-test)
+    lfc <- 0
+    se <- fit_rep_n$stdev.unscaled * sqrt(fit_rep_n$s2.post)
+    ## if LFC > 0 (condition 1 > condition 2 for the given contrast): 
+    ## (coefficients - lfc) / se
+    ## if LFC < 0 (condition 1 < condition 2 for the given contrast): 
+    ## (-coefficients - lfc) / se
+    coefficients <- ifelse(ttest_rep1[unlist(features), "logFC"] > 0, 
+        yes = fit_rep_n$coefficients, no = -fit_rep_n$coefficients)
+    tstat <- (coefficients - lfc) / se
+    fit_rep_n$t <- array(0, dim(fit_rep_n$coefficients), 
+        dimnames = dimnames(fit_rep_n$coefficients))
+    fit_rep_n$p.value <- pt(tstat, df = fit_rep_n$df.total, 
+        lower.tail = FALSE)
+    tstat <- pmax(tstat, 0)
+    fit_rep_n$t <- tstat
+    fit_rep_n$treat.lfc <- lfc
+    tT <- limma::topTable(fit_rep_n, number = Inf, 
+        adjust.method = "fdr", p.value = 1)
+    rownames(tT) <- names(fit_rep_n$Amean)
+    tT
+}
 
 perform_ttest <- function(features, rep1, rep2, line) {
     
@@ -475,12 +403,12 @@ perform_ttest <- function(features, rep1, rep2, line) {
     
     ## rep2
     lines_rep2 <- data.frame(lines = character(ncol(rep2_values)))
-    lines_rep2[grep(colnames(rep2_values), pattern = "Col_0_"),] <- "Col0"
+    lines_rep2[grep(colnames(rep2_values), pattern = "Col_0_"), ] <- "Col0"
     lines_rep2[grep(colnames(rep2_values), pattern = line), ] <- "line"
     other_lines_rep2 <- paste(other_lines, "_", sep = "")
     other_lines_rep2 <- paste(other_lines_rep2, collapse = "|")
     lines_rep2[
-        grep(colnames(rep1_values), pattern = other_lines_rep2), ] <- "salk"
+        grep(colnames(rep2_values), pattern = other_lines_rep2), ] <- "salk"
     modelMatrix_rep2 <- model.matrix(~ lines + 0, lines_rep2)
     
     ## build contrasts
@@ -511,25 +439,8 @@ perform_ttest <- function(features, rep1, rep2, line) {
     fit_rep2_col0 <- limma::eBayes(fit_rep2_col0, trend = TRUE)
     
     ### for rep2 include the information from the rep1 (one-sided t-test)
-    lfc <- 0
-    se <- fit_rep2_col0$stdev.unscaled * sqrt(fit_rep2_col0$s2.post)
-    ## if LFC > 0 (condition 1 > condition 2 for the given contrast): 
-    ## (coefficients - lfc) / se
-    ## if LFC < 0 (condition 1 < condition 2 for the given contrast): 
-    ## (-coefficients - lfc) / se
-    coefficients <- ifelse(ttest_rep1_col0[features_rep1, "logFC"] > 0, 
-        yes = fit_rep2_col0$coefficients, no = -fit_rep2_col0$coefficients)
-    tstat <- (coefficients - lfc) / se
-    fit_rep2_col0$t <- array(0, 
-        dim(fit_rep2_col0$coefficients), 
-        dimnames = dimnames(fit_rep2_col0$coefficients))
-    fit_rep2_col0$p.value <- pt(tstat, df = fit_rep2_col0$df.total, 
-        lower.tail = FALSE)
-    tstat <- pmax(tstat, 0)
-    fit_rep2_col0$t <- tstat
-    fit_rep2_col0$treat.lfc <- lfc
-    ttest_rep2_col0 <- limma::topTable(fit_rep2_col0, number = Inf, 
-        adjust.method = "fdr", p.value = 1)
+    ttest_rep2_col0 <- alternative_hypothesis(fit_rep_n = fit_rep2_col0, 
+        ttest_rep1 = ttest_rep1_col0, features = features_rep1)
     
     ## for salk
     ## rep1
@@ -543,29 +454,12 @@ perform_ttest <- function(features, rep1, rep2, line) {
     fit_rep2_salk <- limma::eBayes(fit_rep2_salk, trend = TRUE)
     
     ### for rep2 include the information from the rep1 (one-sided t-test)
-    lfc <- 0
-    se <- fit_rep2_salk$stdev.unscaled * sqrt(fit_rep2_salk$s2.post)
-    ## if LFC > 0 (condition 1 > condition 2 for the given contrast): 
-    ## (coefficients - lfc) / se
-    ## if LFC < 0 (condition 1 < condition 2 for the given contrast): 
-    ## (-coefficients - lfc) / se
-    coefficients <- ifelse(ttest_rep1_salk[features_rep1, "logFC"] > 0, 
-        yes = fit_rep2_salk$coefficients, no = -fit_rep2_salk$coefficients)
-    tstat <- (coefficients - lfc) / se
-    fit_rep2_salk$t <- array(0, 
-        dim(fit_rep2_salk$coefficients), 
-        dimnames = dimnames(fit_rep2_salk$coefficients))
-    fit_rep2_salk$p.value <- pt(tstat, df = fit_rep2_salk$df.total, 
-        lower.tail = FALSE)
-    tstat <- pmax(tstat, 0)
-    fit_rep2_salk$t <- tstat
-    fit_rep2_salk$treat.lfc <- lfc
-    ttest_rep2_salk <- limma::topTable(fit_rep2_salk, number = Inf, 
-        adjust.method = "fdr", p.value = 1)
-    
+    ttest_rep2_salk <- alternative_hypothesis(fit_rep_n = fit_rep2_salk, 
+        ttest_rep1 = ttest_rep1_salk, features = features_rep1)
+
     ## reconcile the results
-    cols <- c("logFC_rep1", "logFC_rep2", "P.Value_rep1", "P.Value_rep2",
-        "adj.P.Val_rep1", "adj.P.Val_rep2", "AveExpr_rep1", "AveExpr_rep2",
+    cols <- c("logFC_rep1", "logFC_rep2", "adj.P.Val_rep1", "adj.P.Val_rep2", 
+        "P.Value_rep1", "P.Value_rep2", "AveExpr_rep1", "AveExpr_rep2",
         "t_rep1", "t_rep2", "B_rep1", "B_rep2")
     
     ## col0
@@ -609,28 +503,28 @@ If `y` is to be expected higher than `x` (only in the second replicate),
 
 #### SALK_037430
 ```{r ttests_neg_SALK_037430, echo = FALSE}
-features_SALK_037430 <- list()
+features <- list()
 
 print("## Cluster_30089/Cluster_061967")
 print("## 498.1257/8.23")
 pl_sel <- get_metabolite(pl = rep1, mz = 498.1259, rt = 8.23)
-features_SALK_037430[["Cluster_30089/Cluster_061967"]] <- rownames(pl_sel)
+features[["Cluster_30089/Cluster_061967"]] <- rownames(pl_sel)
 
 print("## Cluster_32016/Cluster_067344")
 print("## 537.1982/5.02")
 pl_sel <- get_metabolite(pl = rep1, mz = 537.1982, rt = 5.02)
-features_SALK_037430[["Cluster_32016/Cluster_067344"]] <- rownames(pl_sel)
+features[["Cluster_32016/Cluster_067344"]] <- rownames(pl_sel)
 
 print("## Cluster_30089/Cluster_061967")
 print("## 498.1257/8.23")
 pl_sel <- get_metabolite(pl = rep1, mz = 498.1259, rt = 8.23)
-features_SALK_037430[["Cluster_30089/Cluster_061967"]] <- rownames(pl_sel)
+features[["Cluster_30089/Cluster_061967"]] <- rownames(pl_sel)
 
 print("## Cluster_32016/Cluster_067344")
 pl_sel <- get_metabolite(pl = rep1, mz = 537.1982, rt = 5.02)
 print("## 537.1982/5.02")
 print("## 537.1977/5.77")
-features_SALK_037430[["Cluster_32016/Cluster_067344"]] <- rownames(pl_sel[1:2, ])
+features[["Cluster_32016/Cluster_067344"]] <- rownames(pl_sel[1:2, ])
 
 print("## Cluster_42555/Cluster_090947")
 pl_sel <- get_metabolite(pl = rep1, mz = 728.2757, rt = 4.88) ## n.f.
@@ -640,7 +534,12 @@ print("## Cluster_42557/Cluster_090947")
 pl_sel <- get_metabolite(pl = rep1, mz = 728.2774, rt = 5.04) ## n.f.
 print("feature not found in repl. 1")
 
-perform_ttest(features_SALK_037430, rep1_cor, rep2_cor, line = "SALK_037430_4")
+tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, line = "SALK_037430_4")
+
+print("Col0")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK")
+rmarkdown::paged_table(tt[["salk"]])
 ```
 
 #### SALK_072964
@@ -744,23 +643,27 @@ pl_sel <- get_metabolite(pl = rep1, mz = 845.2356, rt = 4.98)
 pl_sel <- get_metabolite(pl = rep2, mz = 845.2356, rt = 4.98) ## n.f.
 print("feature not found in repl. 2")
 
-perform_ttest(features_SALK_072964, rep1_cor, rep2_cor, line = "SALK_072964_5")
+tt <- perform_ttest(features_SALK_072964, rep1_cor, rep2_cor, line = "SALK_072964_5")
+print("Col0")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK")
+rmarkdown::paged_table(tt[["salk"]])
 ```
 
 #### SALK_024438
 
 ```{r salk_024438, echo = FALSE}
-features_SALK_024438 <- list()
+features <- list()
 
 print("## Cluster_26220/Cluster_050308")
 pl_sel <- get_metabolite(pl = rep1, mz = 415.1264, rt = 8.16)
 print("## 415.1263/8.21")
-features_SALK_024438[["Cluster_26220/Cluster_050308"]] <- rownames(pl_sel)
+features[["Cluster_26220/Cluster_050308"]] <- rownames(pl_sel)
 
 print("## Cluster_29119/Cluster_059172")
 pl_sel <- get_metabolite(pl = rep1, mz = 477.0638, rt = 6.33)
 print("## 477.0645/6.38")
-features_SALK_024438[["Cluster_29119/Cluster_059172"]] <- rownames(pl_sel[2, ])
+features[["Cluster_29119/Cluster_059172"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_35940/Cluster_076981")
 pl_sel <- get_metabolite(pl = rep1, mz = 607.0222, rt = 6.33) ## n.f.
@@ -771,485 +674,154 @@ print("feature not found in repl. 1")
 print("## Cluster_36285/Cluster_077756")
 pl_sel <- get_metabolite(pl = rep1, mz = 613.0401, rt = 6.33)
 print("## 613.0398/6.39")
-features_SALK_024438[["Cluster_36285/Cluster_077756"]] <- rownames(pl_sel[1, ])
+#features[["Cluster_36285/Cluster_077756"]] <- rownames(pl_sel[1, ])
+print("feature not found in repl. 1")
 
 print("## Cluster_36917/Cluster_079278")
 pl_sel <- get_metabolite(pl = rep1, mz = 625.1013, rt = 4.17) ## n.f.
 print("feature not found in repl. 1")
 
-perform_ttest(features = features_SALK_024438, rep1 = rep1_cor, rep2 = rep2_cor, 
-              line = "SALK_024438")
+tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
+    line = "SALK_024438_5")
+
+print("Col0")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK")
+rmarkdown::paged_table(tt[["salk"]])
+
 ```
 
 #### SALK_011180/SALK_021216/SALK_049338
 
 
-```{r salk_011180_021216_049338}
-## continue from here with setting n_rep1 and n_rep2
-n_rep1 <- 22
-n_rep2 <- 22
+```{r salk_011180_021216_049338, echo = FALSE}
+features_SALK <- list()
 
 print("## Cluster_27573/Cluster_054996")
 pl_sel <- get_metabolite(pl = rep1, mz = 477.0939, rt = 7.42)
 print("## 477.0872/8.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for Col-0 or SALK")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for SALK")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)[salk]
-print("SALK_049338, not significant for Col-0")
-pl_sel <- get_metabolite(pl = rep2, mz = 477.0939, rt = 7.42)
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n, "less")
-#print("repl. 2, 477.0883/7.87, alternative: less (Col-0)")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[col0]
-#print("repl. 2, 477.0883/7.87, alternative: greater (SALK)")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")[salk]
+features_SALK[["Cluster_27573/Cluster_054996"]] <- rownames(pl_sel)
 
 print("## Cluster_28337/Cluster_057215")
 pl_sel <- get_metabolite(pl = rep1, mz = 463.0882, rt = 6.94)
 print("## 463.0885/7.08")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5")
-print("SALK_011180_5 not significant for SALK and Col-0")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216_4 not significant for Col-0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-print(" ## 463.0885/6.12")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180_5 not significant for salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216_4 not significant for salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338_4 not significant for salk")
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep1) ## 463.0965/7.54
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep1)
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 463.0882, rt = 6.94)
-##perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")
-#print("463.0890/7.01, alternative: less (SALK)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("463.0890/7.01, alternative: greater (SALK and Col-0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-print("## 463.0889/6.24, alternative: less (SALK)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "less")[col0]
-print("## 463.0889/6.24, alternative: less (SALK)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "less")[col0] 
-print("## 463.0889/6.24, alternative: less (SALK)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep2, "less")[col0]
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep2) ## 463.0968/7.68
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep2)
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep2)
+features_SALK[["Cluster_28337/Cluster_057215"]] <- rownames(pl_sel[1:2, ])
+# 
+# pl_sel <- get_metabolite(pl = rep1, mz = 463.0882, rt = 6.94)
+# df <- data.frame(values = as.numeric(pl_sel[1, 6:132]), genotype = colnames(pl_sel)[6:132])
+# df$genotype <- unlist(lapply(strsplit(df$genotype, split = "_"), function(x) paste(x[1], x[2], sep = "_")))
+# ggplot2::ggplot(df, aes(x = genotype, y = values)) + geom_point() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+# 
+# pl_sel <- get_metabolite(pl = rep2, mz = 463.0882, rt = 6.94)
+# df <- data.frame(values = as.numeric(pl_sel[1, 6:129]), genotype = colnames(pl_sel)[6:129])
+# df$genotype <- unlist(lapply(strsplit(df$genotype, split = "_"), function(x) paste(x[1], x[2], sep = "_")))
+# ggplot2::ggplot(df, aes(x = genotype, y = values)) + geom_point() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+
+
+
 
 print("## Cluster_31680/Cluster_066469")
 pl_sel <- get_metabolite(pl = rep1, mz = 531.0760, rt = 6.95)
 print("531.0761/7.07")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n_rep1)[col0]
-print("SALK_011180_5 not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)
-print("SALK_021216_4 not significant for salk and Col-0")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1) ## 531.0838/7.55
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 531.0760, rt = 6.95)
-#print("## 531.0764/7.02, alternative: greater (Col0), SALK_011180")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0] 
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")
-print("## 531.0764/7.02, alternative: greater (Col0 and SALK), SALK_049338")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "less") ## 531.0842/7.70
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "less")
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep2, "less")
+features_SALK[["Cluster_31680/Cluster_066469"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_35169/Cluster_075199")
 pl_sel <- get_metabolite(pl = rep1, mz = 593.1515, rt = 6.43)
 print("## 593.1516/6.73")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180 not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338 not significant for salk")
-print("## 593.1518/6.00")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1) 
-print("SALK_011180 not significant for salk and Col-0")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216 not significant for salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338 not significant for Col0 and salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 593.1515, rt = 6.43)
-#print("## repl. 2, SALK_011180, 593.1519/6.68, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater") [col0]
-#print("## repl. 2, SALK_021216, 593.1519/6.68, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("## repl. 2, SALK_021216, 593.1519/6.68, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("## repl. 2, SALK_049338, 593.1519/6.68, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")[col0]
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "greater") 
-print("## repl. 2, SALK_021216, 593.1519/5.95, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-#print("## repl.2, SALK_049338, 593.1519/5.95, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep2, "greater")[col0]
+features_SALK[["Cluster_35169/Cluster_075199"]] <- rownames(pl_sel[1:2, ])
+
+# pl_sel <- get_metabolite(pl = rep1, mz = 593.1515, rt = 6.43)
+# df <- data.frame(values = as.numeric(pl_sel[2, 6:128]), genotype = colnames(pl_sel)[6:128])
+# df$genotype <- unlist(lapply(strsplit(df$genotype, split = "_"), function(x) paste(x[1], x[2], sep = "_")))
+# ggplot2::ggplot(df, aes(x = genotype, y = values)) + geom_point() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
+# 
+# pl_sel <- get_metabolite(pl = rep2, mz = 593.1515, rt = 6.43)
+# df <- data.frame(values = as.numeric(pl_sel[1, 6:130]), genotype = colnames(pl_sel)[6:130])
+# df$genotype <- unlist(lapply(strsplit(df$genotype, split = "_"), function(x) paste(x[1], x[2], sep = "_")))
+# ggplot2::ggplot(df, aes(x = genotype, y = values)) + geom_point() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
 
 print("## Cluster_36050/Cluster_077251")
 pl_sel <- get_metabolite(pl = rep1, mz = 609.1464, rt = 6.05)
 print("## 609.1466/6.20")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-#print(" ## 609.1462/5.56")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)
-#print("SALK_011180, not significant for salk and col0")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[col0]
-#print("SALK_021216, not signficant for salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-#print("SALK_049338, not significant for salk and col0")
-pl_sel <- get_metabolite(pl = rep2, mz = 609.1464, rt = 6.05)
-#print("repl. 2, SALK_011180, 609.1469/6.15, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 609.1469/6.15, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 609.1469/6.15, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 609.1469/6.15, alternative: greater (Col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep2, "greater")
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep2, "less") ## 609.1466/5.52
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep2, "less")
-# perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep2, "less")
+features_SALK[["Cluster_36050/Cluster_077251"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_36813/Cluster_079019")
 pl_sel <- get_metabolite(pl = rep1, mz = 623.1617, rt = 6.65)
 print("## 623.1625/6.79")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)[salk]
-print("SALK_049338, not significant for col0")
 print("## 623.1621/7.24")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1) 
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338, not significant for salk")
 print("## 623.1619/6.15")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep1)
-print("SALK_021216, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep1)
-print("## 623.1598/5.66")
-#perform_ttest(pl = pl_sel[4, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for salk")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338, not significant for salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 623.1617, rt = 6.65)
-#print("repl. 2, SALK_011180, 623.1629/6.74, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 623.1629/6.74, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_049338, 623.1629/6.74, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep2, "less")[salk]
-##perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater") ## 623.1624/7.18
-#print("repl. 2, SALK_021216, 623.1624/7.18, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_049338, 623.1624/7.18, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")[col0]
-##perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep2, "greater") ## 623.1621/6.10
-print("repl. 2, SALK_021216, 623.1621/6.10, alternative: greater (Col0 and salk)")
-perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep2, "greater")
-print("repl. 2, SALK_049338, 623.1621/6.10, alternative: less (Col0 and salk)")
-perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep2, "less")
-#print("repl. 2, SALK_011180, 623.1603/5.77, alternative: less (Col0)")
-#perform_ttest(pl = pl_sel[4, ], line = "SALK_011180_5", n = n_rep2, "less")[col0]
-print("repl. 2, SALK_021216, 623.1603/5.77, alternative: less (Col0)")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_021216_4", n = n_rep2, "less")[col0]
-print("repl. 2, SALK_049338, 623.1603/5.77, alternative: less (Col0)")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_049338_4", n = n_rep2, "less")[col0]
+features_SALK[["Cluster_36813/Cluster_079019"]] <- rownames(pl_sel[1:3, ])
 
 print("## Cluster_36921/Cluster_079272")
 pl_sel <- get_metabolite(pl = rep1, mz = 625.1408, rt = 6.27)
 print("## 625.1416/6.12")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1) 
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338, not significant for salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 625.1408, rt = 6.27)
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater") ## 625.1417/6.07
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-#print("repl. 2, SALK_011180, 625.1418/6.29, alternative: less (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "greater") ## 625.1418/6.29
-#print("repl. 2, SALK_021216, 625.1418/6.29, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_049338, 625.1418/6.29, alternative: greater (Col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep2, "greater")[col0]
-# perform_ttest(pl = pl_sel[4, ], line = "SALK_011180_5", n = n_rep2, "greater") ## 625.1374/5.87
-# perform_ttest(pl = pl_sel[4, ], line = "SALK_021216_4", n = n_rep2, "greater")
-# perform_ttest(pl = pl_sel[4, ], line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_36921/Cluster_079272"]] <- rownames(pl_sel)
 
 print("## Cluster_38140/Cluster_081769")
 pl_sel <- get_metabolite(pl = rep1, mz = 645.1232, rt = 6.05)
 print("## 645.1229/6.20")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-#print("## 645.1236/5.36")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1) 
-#print("SALK_011180, not significant for Col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)
-#print("SALK_021216, not significant for Col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-#print("SALK_049338, not significant for Col0 and salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 645.1232, rt = 6.05)
-#print("repl. 2, SALK_011180, 645.1233/6.15, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 645.1233/6.15, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 645.1233/6.15, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 645.1233/6.15, alternative: lgreater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-#perform_ttest(pl = pl_sel[4, ], line = "SALK_011180_5", n = n_rep2, "less") ## 645.1235/5.53
-#perform_ttest(pl = pl_sel[4, ], line = "SALK_021216_4", n = n_rep2, "less")
-#perform_ttest(pl = pl_sel[4, ], line = "SALK_049338_4", n = n_rep2, "less")
+features_SALK[["Cluster_38140/Cluster_081769"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_38744/Cluster_083055")
 pl_sel <- get_metabolite(pl = rep1, mz = 655.1520, rt = 6.05)
 print("## 655.1519/6.20")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep1) ## 655.1531/6.79
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep1)
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 655.1520, rt = 6.05)
-#print("repl. 2, SALK_011180, 655.1521/6.15, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0] ## 655.1521/6.15
-print("repl. 2, SALK_021216, 655.1521/6.15, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 655.1521/6.15, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 655.1521/6.15, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep2, "less") ## 655.1539/6.73
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep2, "less")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep2, "less")
+features_SALK[["Cluster_38744/Cluster_083055"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_39122/Cluster_083810")
 pl_sel <- get_metabolite(pl = rep1, mz = 661.1390, rt = 6.43)
 print("## 661.1390/6.73")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_0121216, not significant for col0")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)[col0]
-print("SALK_049338, not significant for and salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 661.1390, rt = 6.43)
-#print("repl. 2, SALK_011180, 661.1393/6.68, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 661.1393/6.68, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-#print("repl. 2, SALK_049338, 661.1393/6.68, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")[col0]
-
+features_SALK[["Cluster_39122/Cluster_083810"]] <- rownames(pl_sel)
 
 print("## Cluster_39933/Cluster_085577")
 pl_sel <- get_metabolite(pl = rep1, mz = 677.1342, rt = 6.05)
 print("## 677.1340/6.19")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 677.1342, rt = 6.05)
-#print("repl. 2, SALK_011180, 677.1343/6.14, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-#print("repl. 2, SALK_011180, 677.1343/6.14, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[salk]
-print("repl. 2, SALK_021216, 677.1343/6.14, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 677.1343/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 677.1343/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-
+features_SALK[["Cluster_39933/Cluster_085577"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_41440/Cluster_088739")
 pl_sel <- get_metabolite(pl = rep1, mz = 707.1211, rt = 6.05)
-print("## 707.1236/6.89")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for salk")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-print("## 707.1172/6.20")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, not significant for Col0 and salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 707.1211, rt = 6.05)
-print("repl. 2, SALK_011180, 707.1238/6.83, alternative: less (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep2, "less")[col0]
-#print("repl. 2, SALK_021216, 707.1238/6.83, alternative: less (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep2, "less")[col0]
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n, "less")
-#print("repl. 2, SALK_011180, 707.1188/6.14, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0] 
-#print("repl. 2, SALK_021216, 707.1188/6.14, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 707.1188/6.14, alternative: greater (salk and Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-
+print("## 707.1236/6.19")
+features_SALK[["Cluster_41440/Cluster_088839"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_41494/Cluster_088839")
 pl_sel <- get_metabolite(pl = rep1, mz = 708.0628, rt = 6.05)
 print("708.0637/6.20")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1) 
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 708.0628, rt = 6.05)
-#print("repl. 2, SALK_011180, 708.0635/6.14, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-#print("repl. 2, SALK_011180, 708.0635/6.14, alternative: less (salk)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_021216, 708.0635/6.14, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 708.0635/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 708.0635/6.14, alternative: greater (Col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
-
+features_SALK[["Cluster_41494/Cluster_088839"]] <- rownames(pl_sel)
 
 print("## Cluster_42266/Cluster_090361")
 pl_sel <- get_metabolite(pl = rep1, mz = 723.1390, rt = 6.05)
 print("## 723.1398/6.19")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 723.1390, rt = 6.05)
-#print("repl. 2, SALK_011180, 723.1403/6.15, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep2, "greater")[col0] 
-print("repl. 2, SALK_021216, 723.1403/6.15, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "greater")
-print("repl. 2, SALK_021216, 723.1403/6.15, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep2, "less")
-print("repl. 2, SALK_049338, 723.1403/6.15, alternative: greater (Col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep2, "greater")
-
+features_SALK[["Cluster_42266/Cluster_090361"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_43042/Cluster_091992")
 pl_sel <- get_metabolite(pl = rep1, mz = 739.1040, rt = 6.05)
 print("## 739.1060/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 739.1040, rt = 6.05)
-#print("repl. 2, SALK_011180, 739.1058/6.14, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater")[col0] 
-print("repl. 2, SALK_021216, 739.1058/6.14, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 739.1058/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-#print("repl. 2, SALK_049338, 739.1058/6.14, alternative: greater (Col0 and salk)")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_43042/Cluster_091992"]] <- rownames(pl_sel)
 
 print("## Cluster_43398/Cluster_092629")
 pl_sel <- get_metabolite(pl = rep1, mz = 745.1224, rt = 6.05)
 print("745.1216/6.20")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 an dsalk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 745.1224, rt = 6.05)
-#print("repl. 2, SALK_011180, 745.1221/6.14, alternative: greater (Col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-#print("repl. 2, SALK_011180, 745.1221/6.14, alternative: less (salk)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_021216, 745.1221/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 745.1221/6.14, alternative: greater (Col0)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
-
+features_SALK[["Cluster_43398/Cluster_092629"]] <- rownames(pl_sel)
 
 print("## Cluster_44151/Cluster_010308")
 pl_sel <- get_metabolite(pl = rep1, mz = 761.0875, rt = 6.05)
 print("761.0928/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, not significant for col0")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 761.0875, rt = 6.05) 
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater") ## 761.0948/6.14
-print("repl. 2, SALK_021216, 761.0948/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 761.0948/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_44151/Cluster_010308"]] <- rownames(pl_sel)
 
 print("## Cluster_46078/Cluster_098040")
 pl_sel <- get_metabolite(pl = rep1, mz = 807.0911, rt = 6.05)
 print("807.0925/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0] 
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 807.0911, rt = 6.05)
-#print("repl. 2, SALK_011180, 807.0944/6.14, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater")[col0]
-# print("repl. 2, SALK_021216, 807.0944/6.14, alternative: greater (col0)")
-# perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 807.0944/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049938, 807.0944/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_46078/Cluster_098040"]] <- rownames(pl_sel)
 
 print("## Cluster_46322/Cluster_098526")
 pl_sel <- get_metabolite(pl = rep1, mz = 813.1080, rt = 6.05)
 print("## 813.1088/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[salk]
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_011180, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 813.1080, rt = 6.05)
-#print("repl. 2, SALK_011180, 813.1099/6.14, alternative: less (salk)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "less")[salk] 
-print("repl. 2, SALK_021216, 813.1099/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049938, 813.1099/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_46322/Cluster_098526"]] <- rownames(pl_sel)
 
 print("## Cluster_46959/Cluster_011972")
 pl_sel <- get_metabolite(pl = rep1, mz = 829.0748, rt = 6.05)
 print("## 829.0803/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1) 
-print("SALK_011180, not significant for salk and col0")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 829.0748, rt = 6.05)
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater") 
-print("repl. 2, SALK_021216, 829.0820/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 829.0820/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_46959/Cluster_011972"]] <- rownames(pl_sel)
 
 print("## Cluster_48505/Cluster_102833")
 pl_sel <- get_metabolite(pl = rep1, mz = 875.0775, rt = 6.05) ## n.f.
@@ -1258,38 +830,33 @@ print("feature not found in repl. 1")
 print("## Cluster_51012/Cluster_107244")
 pl_sel <- get_metabolite(pl = rep1, mz = 958.0279, rt = 6.05)
 print("## 958.0318/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-pl_sel <- get_metabolite(pl = rep2, mz = 958.0279, rt = 6.05)
-##perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "less")
-#print("repl. 2, SALK_021216, 958.0318/6.12, alternative: less (col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[col0]
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_51012/Cluster_107244"]] <- rownames(pl_sel)
 
 print("## Cluster_56819/Cluster_114131")
 pl_sel <- get_metabolite(pl = rep1, mz = 1219.2990, rt = 6.05)
 print("1219.3000/6.20")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[col0]
-print("SALK_021216, not significant for salk")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-pl_sel <- get_metabolite(pl = rep2, mz = 1219.2990, rt = 6.05)
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep2, "greater") 
-print("repl. 2, SALK_021216, 1219.3000/6.15, alternative: greater (col0)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "greater")[col0]
-print("repl. 2, SALK_021216, 1219.3000/6.15, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep2, "less")[salk]
-print("repl. 2, SALK_049338, 1219.3000/6.15, alternative: greater (col0)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep2, "greater")
+features_SALK[["Cluster_56819/Cluster_114131"]] <- rownames(pl_sel)
 
+tt <- perform_ttest(features = features_SALK, rep1 = rep1_cor, rep2 = rep2_cor, 
+    line = "SALK_011180_5")
+print("Col0/SALK_011180_5")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_011180_5")
+rmarkdown::paged_table(tt[["salk"]])
 
-perform_ttest(features = features_SALK_024438, rep1 = rep1_cor, rep2 = rep2_cor, 
-    line = "SALK_024438")
+tt <- perform_ttest(features = features_SALK, rep1 = rep1_cor, rep2 = rep2_cor, 
+    line = "SALK_021216_4")
+print("Col0/SALK_021216_4")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_021216_4")
+rmarkdown::paged_table(tt[["salk"]])
+
+tt <- perform_ttest(features = features_SALK, rep1 = rep1_cor, rep2 = rep2_cor, 
+    line = "SALK_049338_4")
+print("Col0/SALK_049338_4")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_049338_4")
+rmarkdown::paged_table(tt[["salk"]])
 ```
 
 
@@ -1297,7 +864,7 @@ perform_ttest(features = features_SALK_024438, rep1 = rep1_cor, rep2 = rep2_cor,
 ## Positive mode
 
 ### Load and prepare the data 
-```{r load_positive}
+```{r load_positive, echo = FALSE}
 weights_rep1 <- weights_rep1_old
 weights_rep2 <- weights_rep2_old
 ################################################################################
@@ -1330,7 +897,7 @@ rep2_neg[rep2_neg == 0] <- NA
 ```
 
 Check data quality with `shinyQC`.
-```{r shinyQC_prep_rep1_pos}
+```{r shinyQC_prep_rep1_pos, echo = FALSE}
 ## rep1
 cols <- which(colnames(rep1) == "C24_1"):which(colnames(rep1) == "SALK_204674C_3_5")
 a <- rep1[, cols] |> as.matrix()
@@ -1338,16 +905,16 @@ rD <- rep1[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
 cD <- data.frame(name = colnames(rep1)[cols])
 cD <- dplyr::left_join(cD, weights_rep1, by = c("name" = "genotype"))
 cD$batch <- ifelse(cD$injection_vial < 60, "1", "2")
-cD$genotype <- gsub(x = cD$name, pattern = "_[0-9][0-9]$|_[0-9]$", replacement= "")
+cD$genotype <- gsub(x = cD$name, pattern = "_[0-9][0-9]$|_[0-9]$", replacement = "")
 se_rep1 <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
 rownames(se_rep1) <- paste("feature", seq_len(nrow(se_rep1)), sep = "_")
 ```
 
-```{r shinyQC_rep1_pos, eval = FALSE}
+```{r shinyQC_rep1_pos, eval = FALSE, echo = FALSE}
 MatrixQCvis::shinyQC(se_rep1)
 ```
 
-```{r shinyQC_prep_rep1_neg}
+```{r shinyQC_prep_rep1_neg, echo = FALSE}
 ## rep1_neg
 cols <- which(colnames(rep1_neg) == "C24_1"):which(colnames(rep1_neg) == "SALK_204674C_3_5")
 a <- rep1_neg[, cols] |> as.matrix()
@@ -1364,7 +931,7 @@ rownames(se_rep1_neg) <- paste("feature", seq_len(nrow(se_rep1_neg)), sep = "_")
 MatrixQCvis::shinyQC(se_rep1_neg)
 ```
 
-```{r shinyQC_prep_rep2_neg}
+```{r shinyQC_prep_rep2_neg, echo = FALSE}
 ## rep2_neg
 cols <- which(colnames(rep2_neg) == "C24_1"):which(colnames(rep2_neg) == "SALK_204674C_3_5")
 a <- rep2_neg[, cols] |> as.matrix()
@@ -1382,7 +949,7 @@ MatrixQCvis::shinyQC(se_rep2_neg)
 ```
 
 Remove outliers
-```{r outlier_pos}
+```{r outlier_pos, echo = FALSE}
 ## rep1
 outlier <- c("SALK_008908_3_14", "SALK_020876_4_4")
 se_rep1 <- MatrixQCvis:::selectSampleSE(se_rep1, selection = outlier,
@@ -1400,7 +967,7 @@ se_rep2_neg <- MatrixQCvis:::selectSampleSE(se_rep2_neg, selection = outlier,
     mode = "exclude")
 ```
 
-```{r transformation_pos, warning = FALSE, message = FALSE}
+```{r transformation_pos, warning = FALSE, message = FALSE, echo = FALSE}
 ## divide by weight
 assay(se_rep1) <- sweep(assay(se_rep1), MARGIN = 2, STATS = se_rep1$weight, 
     FUN = "/")
@@ -1445,6 +1012,344 @@ rep2_neg[, colnames(se_rep2_neg)] <- rep2_neg[, colnames(se_rep2_neg)] |>
     imputeAssay(method = "MinDet")
 ```
 
+Combine rep1, rep1_neg and rep2_neg. 
+
+Link `rep1` to `rep1_neg` and `rep2_neg` using the correlation and rt 
+deviation.
+
+```{r, echo = FALSE}
+rt.dev.range <- c(-0.01, 0.01)
+rt.dev.range <- c(-30, 30)
+match_seed1 <- read.csv("match_seed1.csv")
+match_seed2 <- read.csv("match_seed2.csv")
+
+## create function to perform t-test
+#' @param features rownames in rep1 to take for performing t-tests
+#' @param rep1 containing the values and mapping to rep2 in column mapping_rep1_rep2
+perform_ttest <- function(features, rep1, rep1_neg, rep2_neg, line) {
+    
+    ## add _ to line (to circumvent selection of the column of line that shows
+    ## number of detected compounds)
+    line <- paste(line, "_", sep = "")
+    
+    ## define the other lines (remove the line itself and the line on the same
+    ## gene, if applicable)
+    if (line == "SALK_008908_3_")
+        other_lines <- c("SALK_011180_5", "SALK_020876_4", "SALK_021216_4", 
+            "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", 
+            "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2", 
+            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_011180_5_")
+        other_lines <- c("SALK_008908_3", "SALK_020876_4", "SALK_024438_5", 
+            "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
+            "SALK_081021_6", "SALK_201809C_2", "SALK_203337C_2", 
+            "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_020876_4_")   
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_021216_4", 
+            "SALK_024438_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
+            "SALK_201809C_2", "SALK_203337C_2", "SALK_203919C_2",
+            "SALK_204674C_3")
+    
+    if (line == "SALK_021216_4_")
+        other_lines <- c("SALK_008908_3", "SALK_020876_4", "SALK_024438_5", 
+            "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
+            "SALK_081021_6", "SALK_201809C_2", "SALK_203337C_2", 
+            "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_024438_5_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_027837_5", "SALK_037430_4", "SALK_049338_4", 
+            "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2",   
+            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_027837_5_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_021216_4", 
+            "SALK_024438_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5", 
+            "SALK_201809C_2", "SALK_203337C_2", "SALK_203919C_2", 
+            "SALK_204674C_3")
+    
+    if (line == "SALK_037430_4_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_049338_4", 
+            "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2",   
+            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_049338_4_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_072964_5", 
+            "SALK_081021_6", "SALK_201809C_2", "SALK_203337C_2", 
+            "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_072964_5_")  
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
+            "SALK_049338_4", "SALK_081021_6", "SALK_201809C_2",   
+            "SALK_203337C_2", "SALK_203919C_2", "SALK_204674C_3")
+    
+    if (line == "SALK_081021_6_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_021216_4", 
+            "SALK_024438_5", "SALK_037430_4", "SALK_049338_4", "SALK_072964_5",
+            "SALK_201809C_2", "SALK_203337C_2", "SALK_203919C_2", 
+            "SALK_204674C_3")
+    
+    if (line == "SALK_201809C_2_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
+            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_204674C_3")
+    
+    if (line == "SALK_203337C_2_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
+            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_204674C_3")
+    
+    if (line == "SALK_203919C_2_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
+            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_204674C_3")
+    
+    if (line == "SALK_204674C_3_")
+        other_lines <- c("SALK_008908_3", "SALK_011180_5", "SALK_020876_4",    
+            "SALK_021216_4", "SALK_024438_5", "SALK_027837_5", "SALK_037430_4", 
+            "SALK_049338_4", "SALK_072964_5", "SALK_081021_6", "SALK_201809C_2",   
+            "SALK_203337C_2", "SALK_203919C_2")
+    
+    ## find corresponding features in rep1_neg and rep2_neg
+    features_rep1 <- lapply(strsplit(names(features), split = "/"), "[", 1) |>
+        unlist()
+    features_rep2 <- lapply(strsplit(names(features), split = "/"), "[", 2) |>
+        unlist()
+    
+    ## iterate through cluster features and find corresponding features in
+    ## rep1_neg and rep2_neg
+    cols <- c("names_neg", "neg_mz", "neg_rt")
+    res_rep1_neg <- as.list(rep(NA, length(features_rep1)))
+    res_rep2_neg <- as.list(rep(NA, length(features_rep1)))
+    mz.dev.range <- c(-0.01, 0.01)
+    rt.dev.range <- c(-30, 30)
+    
+    for (i in seq_along(features_rep1)) {
+        features_neg <- rbind(
+            match_seed1[match_seed1$names_pos == features_rep1[i], cols],
+            match_seed2[match_seed2$names_pos == features_rep2[i], cols]
+        )
+        ## iterate through features_neg and find the features in rep1_neg
+        ## and reg2_neg with the smallest deviation
+        for (j in seq_along(nrow(features_neg))) {
+            ## rep1_neg
+            rt.diff <- rep1_neg$rt - features_neg$neg_rt[j] * 60
+            mz.diff <- rep1_neg$mz - features_neg$neg_mz[j]
+            inds <- which(rt.diff > rt.dev.range[1] & rt.diff < rt.dev.range[2] & 
+                mz.diff > mz.dev.range[1] & mz.diff < mz.dev.range[2])
+            res_rep1_neg[[i]] <- c(res_rep1_neg[[i]], inds)
+    
+            ## rep2_neg
+            rt.diff <- rep2_neg$rt - features_neg$neg_rt[j] * 60
+            mz.diff <- rep2_neg$mz - features_neg$neg_mz[j]
+            inds <- which(rt.diff > rt.dev.range[1] & rt.diff < rt.dev.range[2] &
+                mz.diff > mz.dev.range[1] & mz.diff < mz.dev.range[2])
+            res_rep2_neg[[i]] <- c(res_rep2_neg[[i]], inds)
+        }
+    }
+    
+    ## retrieve values that contain the intensities
+    rep1_values <- rep1[, which(colnames(rep1) == "Col_0_1"):which(colnames(rep1) == "SALK_204674C_3_5")]
+    rep1_neg_values <- rep1_neg[, which(colnames(rep1_neg) == "Col_0_1"):which(colnames(rep1_neg) == "SALK_204674C_3_5")]
+    rep2_neg_values <- rep2_neg[, which(colnames(rep2_neg) == "Col_0_1"):which(colnames(rep2_neg) == "SALK_204674C_3_5")]
+
+    ## convert to matrix
+    rep1_values <- as.matrix(rep1_values)
+    mode(rep1_values) <- "numeric"
+    rep1_neg_values <- as.matrix(rep1_neg_values)
+    mode(rep1_neg_values) <- "numeric"
+    rep2_neg_values <- as.matrix(rep2_neg_values)
+    mode(rep2_neg_values) <- "numeric"
+
+    ## assure that we have the same column names
+    cols <- intersect(colnames(rep1_values), colnames(rep1_neg_values))
+    cols <- intersect(cols, colnames(rep2_neg_values))
+    rep1_values <- rep1_values[, cols]
+    rep1_neg_values <- rep1_neg_values[, cols]
+    rep2_neg_values <- rep2_neg_values[, cols]
+
+    ## filter: only take the features that are present in both replicates, for 
+    ## features in rep1 that were mapped multiple times 
+    ## go through res (rows in rep1) and keep the corresponding row in rep1_neg 
+    ## that has the highest correlation term
+    ## rep1_neg
+    res_cor_rep1_neg <- vector("list", length(res_rep1_neg))
+    for (i in 1:length(res_rep1_neg)) {
+        inds <- res_rep1_neg[[i]]
+        if (!all(is.na(inds))) {
+            if (length(inds) > 1) {
+                cors <- cor(rep1_values[features[[i]], ], t(rep1_neg_values[inds, ]))
+            } else {
+                cors <- cor(rep1_values[features[[i]], ], rep1_neg_values[inds,])
+            }
+            cor_max <- cors[which.max(cors)]
+            res_cor_rep1_neg[[i]] <- res_rep1_neg[[i]][which.max(cors)]
+        } else {
+            res_cor_rep1_neg[[i]] <- NA
+        }
+    }
+    res_cor_rep1_neg <- unlist(res_cor_rep1_neg)
+
+    ## rep2_neg
+    res_cor_rep2_neg <- vector("list", length(res_rep2_neg))
+    for (i in 1:length(res_rep2_neg)) {
+        inds <- res_rep2_neg[[i]]
+        if (!all(is.na(inds))) {
+            if (length(inds) > 1) {
+                cors <- cor(rep1_values[features[[i]], ], t(rep2_neg_values[inds, ]))
+                cors <- cors[1, ]
+            } else {
+                cors <- cor(rep1_values[features[[i]], ], rep2_neg_values[inds,])
+            }
+            res_cor_rep2_neg[[i]] <- res_rep2_neg[[i]][which.max(cors)]
+        } else {
+            res_cor_rep2_neg[[i]] <- NA
+        }
+    }
+    res_cor_rep2_neg <- unlist(res_cor_rep2_neg)
+
+    ## create a model matrix
+    ## for rep1, rep1_neg and rep2_neg all same since we ordered the columns
+    ## in the same way in step "assure that we have the same column names"
+    lines_rep1 <- data.frame(lines = character(ncol(rep1_values)))
+    lines_rep1[grep(colnames(rep1_values), pattern = "Col_0_"),] <- "Col0"
+    lines_rep1[grep(colnames(rep1_values), pattern = line), ] <- "line"
+    other_lines_rep1 <- paste(other_lines, "_", sep = "")
+    other_lines_rep1 <- paste(other_lines_rep1, collapse = "|")
+    lines_rep1[
+        grep(colnames(rep1_values), pattern = other_lines_rep1), ] <- "salk"
+    modelMatrix_rep1 <- model.matrix(~ lines + 0, lines_rep1)
+    modelMatrix_rep1_neg <- modelMatrix_rep2_neg <- modelMatrix_rep1
+    
+    ## build contrasts
+    contrast_rep1_col0 <- limma::makeContrasts("linesCol0-linesline", 
+        levels = modelMatrix_rep1)
+    contrast_rep1_salk <- limma::makeContrasts("linessalk-linesline", 
+        levels = modelMatrix_rep1)
+    contrast_rep1_neg_col0 <- contrast_rep2_neg_col0 <- contrast_rep1_col0
+    contrast_rep1_neg_salk <- contrast_rep2_neg_salk <- contrast_rep1_salk
+    
+    ## create a mapping table that will be used to reconcile the results
+    rep1_neg_values <- rep1_neg_values[res_cor_rep1_neg, ]
+    rep2_neg_values <- rep2_neg_values[res_cor_rep2_neg, ]
+    rownames(rep1_neg_values)[!is.na(rownames(rep1_neg_values))] <- paste(
+        rownames(rep1_neg_values)[!is.na(rownames(rep1_neg_values))],
+        seq_along(rownames(rep1_neg_values)[!is.na(rownames(rep1_neg_values))]),
+        sep = "_")
+    rownames(rep2_neg_values)[!is.na(rownames(rep2_neg_values))] <- paste(
+        rownames(rep2_neg_values)[!is.na(rownames(rep2_neg_values))],
+        seq_along(rownames(rep2_neg_values)[!is.na(rownames(rep2_neg_values))]),
+        sep = "_")
+    mappings <- data.frame(
+        rep1 = rownames(rep1_values[unlist(features),]),
+        rep1_neg = rownames(rep1_neg_values),
+        rep2_neg = rownames(rep2_neg_values)    
+    )
+    
+    ## perform tests
+    fit_rep1 <- limma::lmFit(rep1_values[unlist(features), ], 
+        design = modelMatrix_rep1)
+    fit_rep1_neg <- limma::lmFit(
+        rep1_neg_values[!is.na(res_cor_rep1_neg), , drop = FALSE], 
+        design = modelMatrix_rep1_neg)
+    fit_rep2_neg <- limma::lmFit(
+        rep2_neg_values[!is.na(res_cor_rep2_neg), , drop = FALSE], 
+        design = modelMatrix_rep2_neg)
+    
+    ## for col0
+    ## rep1
+    fit_rep1_col0 <- limma::contrasts.fit(fit_rep1, contrast_rep1_col0)
+    fit_rep1_col0 <- limma::eBayes(fit_rep1_col0, trend = TRUE)
+    ttest_rep1_col0 <- limma::topTable(fit_rep1_col0, number = Inf, 
+        adjust.method = "fdr", p.value = 1)
+    
+    ## rep1_neg (include the information from the rep1 (one-sided t-test))
+    fit_rep1_neg_col0 <- limma::contrasts.fit(fit_rep1_neg, contrast_rep1_neg_col0)
+    fit_rep1_neg_col0 <- limma::eBayes(fit_rep1_neg_col0, trend = TRUE)
+    ttest_rep1_neg_col0 <- alternative_hypothesis(
+        fit_rep_n = fit_rep1_neg_col0, ttest_rep1 = ttest_rep1_col0,
+        features = features[!is.na(res_cor_rep1_neg)])
+    
+    ## rep2_neg (include the information from the rep1 (one-sided t-test))
+    fit_rep2_neg_col0 <- limma::contrasts.fit(fit_rep2_neg, contrast_rep2_neg_col0)
+    fit_rep2_neg_col0 <- limma::eBayes(fit_rep2_neg_col0, trend = TRUE)
+    ttest_rep2_neg_col0 <- alternative_hypothesis(
+        fit_rep_n = fit_rep2_neg_col0, ttest_rep1 = ttest_rep1_col0,
+        features = features[!is.na(res_cor_rep2_neg)])
+
+    ## for salk
+    ## rep1
+    fit_rep1_salk <- limma::contrasts.fit(fit_rep1, contrast_rep1_salk)
+    fit_rep1_salk <- limma::eBayes(fit_rep1_salk, trend = TRUE)
+    ttest_rep1_salk <- limma::topTable(fit_rep1_salk, number = Inf, 
+        adjust.method = "fdr", p.value = 1)
+    
+    ## rep1_neg (include the information from the rep1 (one-sided t-test))
+    fit_rep1_neg_salk <- limma::contrasts.fit(fit_rep1_neg, contrast_rep1_neg_salk)
+    fit_rep1_neg_salk <- limma::eBayes(fit_rep1_neg_salk, trend = TRUE)
+    ttest_rep1_neg_salk <- alternative_hypothesis(
+        fit_rep_n = fit_rep1_neg_salk, ttest_rep1 = ttest_rep1_salk,
+        features = features[!is.na(res_cor_rep1_neg)])
+    
+    ## rep2_neg (include the information from the rep1 (one-sided t-test))
+    fit_rep2_neg_salk <- limma::contrasts.fit(fit_rep2_neg, contrast_rep2_neg_salk)
+    fit_rep2_neg_salk <- limma::eBayes(fit_rep2_neg_salk, trend = TRUE)
+    ttest_rep2_neg_salk <- alternative_hypothesis(
+        fit_rep_n = fit_rep2_neg_salk, ttest_rep1 = ttest_rep1_salk,
+        features = unlist(features)[!is.na(res_cor_rep2_neg)])
+    
+    ## reconcile the results
+    cols <- c("logFC_rep1", "logFC_rep1_neg", "logFC_rep2_neg",
+        "adj.P.Val_rep1", "adj.P.Val_rep1_neg", "adj.P.Val_rep2_neg", 
+        "P.Value_rep1", "P.Value_rep1_neg", "P.Value_rep2_neg",
+        "AveExpr_rep1", "AveExpr_rep1_neg", "AveExpr_rep2_neg",
+        "t_rep1", "t_rep1_neg", "t_rep2_neg", 
+        "B_rep1", "B_rep1_neg", "B_rep2_neg")
+    
+    ## col0
+    colnames(ttest_rep1_col0) <- paste0(colnames(ttest_rep1_col0), "_rep1")
+    colnames(ttest_rep1_neg_col0) <- paste0(colnames(ttest_rep1_neg_col0), "_rep1_neg")
+    colnames(ttest_rep2_neg_col0) <- paste0(colnames(ttest_rep2_neg_col0), "_rep2_neg")
+    ttest_col0 <- cbind(rep1 = rownames(ttest_rep1_col0), ttest_rep1_col0)
+    ttest_col0 <- dplyr::left_join(ttest_col0, mappings, by = "rep1")
+    ttest_col0 <- dplyr::left_join(ttest_col0, 
+        cbind(rep1_neg = rownames(ttest_rep1_neg_col0), ttest_rep1_neg_col0),
+        by = "rep1_neg")
+    ttest_col0 <- dplyr::left_join(ttest_col0,
+        cbind(rep2_neg = rownames(ttest_rep2_neg_col0), ttest_rep2_neg_col0),
+        by = "rep2_neg")
+    ttest_col0 <- ttest_col0[, cols]
+    rownames(ttest_col0) <- rownames(ttest_rep1_col0)
+    ttest_col0 <- ttest_col0[unlist(features), ]
+    
+    ## salk
+    colnames(ttest_rep1_salk) <- paste0(colnames(ttest_rep1_salk), "_rep1")
+    colnames(ttest_rep1_neg_salk) <- paste0(colnames(ttest_rep1_neg_salk), "_rep1_neg")
+    colnames(ttest_rep2_neg_salk) <- paste0(colnames(ttest_rep2_neg_salk), "_rep2_neg")
+    ttest_salk <- cbind(rep1 = rownames(ttest_rep1_salk), ttest_rep1_salk)
+    ttest_salk <- dplyr::left_join(ttest_salk, mappings, by = "rep1")
+    ttest_salk <- dplyr::left_join(ttest_salk, 
+        cbind(rep1_neg = rownames(ttest_rep1_neg_salk), ttest_rep1_neg_salk),
+        by = "rep1_neg")
+    ttest_salk <- dplyr::left_join(ttest_salk,
+        cbind(rep2_neg = rownames(ttest_rep2_neg_salk), ttest_rep2_neg_salk),
+        by = "rep2_neg")
+    ttest_salk <- ttest_salk[, cols]
+    rownames(ttest_salk) <- rownames(ttest_rep1_salk)
+    ttest_salk <- ttest_salk[unlist(features), ]
+    
+    
+    ## return the elements
+    list(col0 = ttest_col0, salk = ttest_salk)
+}
+```
+
+
 ### Perform t-tests
 
 Unfortunately, we have no backup of these samples to run the samples in
@@ -1475,124 +1380,61 @@ salk <- c("ttest_SALK_lines", "adj_p_SALK_lines")
 
 #### SALK_008908
 ```{r ttests_pos_SALK_008908, echo = FALSE}
-n_rep1 <- 2
-n_rep_neg <- 2
+features <- list()
 
 print("## Cluster_38138/Cluster_081955")
 pl_sel <- get_metabolite(pl = rep1, mz = 239.0889, rt = 6.24)
 print("## 239.0889/6.24")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_008908_3", n = n_rep1)[col0] 
-#print("SALK_008908, not significant for salk")
-print("## feature in negative mode: Cluster_18741 (Cluster_38138) 211.0607/6.21, p: 0.761")
-print("## feature in negative mode: Cluster_25162 (Cluster_38138) 388.1614/6.21, p: 0.774")
-print("## feature in negative mode: Cluster_046436 (Cluster_081955) 388.1613/6.22, p: 0.84")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 211.0607, rt = 6.22)
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 211.0607, rt = 6.22)
-print("no features found in rep1_neg and pl_reg2_neg")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_38138/Cluster_081955"]] <- rownames(pl_sel[2, ])
 
 
 print("## Cluster_40845/Cluster_086976")
 pl_sel <- get_metabolite(pl = rep1, mz = 265.1068, rt = 7.36)
 print("265.1068/7.35")
-perform_ttest(pl = pl_sel, line = "SALK_008908_3", n = n_rep1)[col0]
-print("SALK_008908, not significant for salk")
-print("## feature in negative mode: Cluster_26158 (Cluster_40845) 414.1771/7.36, p: 0.715")
-print("## no corresponding feature in in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 414.1771, rt = 7.36)
-print("neg, repl. 1: 414.1773/7.36")
-perform_ttest(pl = pl_sel, line = "SALK_008908_3", n = n_rep_neg, "greater")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 414.1771, rt = 7.36)
-print("neg, repl. 2: 414.1774/7.14")
-perform_ttest(pl = pl_sel, line = "SALK_008908_3", n = n_rep_neg, "greater")[col0]
+features[["Cluster_40845/Cluster_086976"]] <- rownames(pl_sel)
+
 
 print("## Cluster_42914/Cluster_090910")
 pl_sel <- get_metabolite(pl = rep1, mz = 284.1486, rt = 5.05)
 print("284.1491/4.54")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_008908_3", n = n_rep1)[col0]
-print("no corresponding feature in negative mode in rep1_neg and rep2_neg")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_42914/Cluster_090910"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_46305/Cluster_099304")
 pl_sel <- get_metabolite(pl = rep1, mz = 324.1805, rt = 7.36)
 print("324.1805/7.36")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_008908_3", n = n_rep1)[col0]
-print("SALK_008908, not significant for salk")
-print("no corresponding feature in negative mode in rep1_neg")
-print("## feature in negative mode: Cluster_050169 (Cluster_099304) 414.1176/7.11, p: 0.873")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 414.1771, rt = 7.11)
-print("neg, repl. 1: 414.1773/7.36")
-perform_ttest(pl = pl_sel, line = "SALK_008908_3", n = n_rep_neg, "greater")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 414.1771, rt = 7.11)
-print("neg, repl. 2: 414.1774/7.14")
-perform_ttest(pl = pl_sel, line = "SALK_008908_3", n = n_rep_neg, "greater")[col0]
+features[["Cluster_46305/Cluster_099304"]] <- rownames(pl_sel[1, ])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_008908_3")
+print("Col0")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK")
+rmarkdown::paged_table(tt[["salk"]])
 ```
 
 
 #### SALK_037430/SALK_020876/SALK_027837/SALK_081021
 
 ```{r ttests_pos_SALK_037430_SALK_020876_SALK_027837_SALK_081021, echo=FALSE}
-n_rep1 <- 4
-n_rep_neg <- 3
+features <- list()
 
 print("## Cluster_12529/Cluster_031642")
 pl_sel <- get_metabolite(pl = rep1, mz = 397.0430, rt = 0.73)
 print("397.0430/0.72")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_037430_4", n = n_rep1)[salk]
-print("SALK_037430, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_020876_4", n = n_rep1)
-print("SALK_020876, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_027837_5", n = n_rep1)
-print("SALK_020876, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_081021_6", n = n_rep1)[col0]
-print("SALK_081021, not significant for col0 and salk")
-print("feature in negative mode: Cluster_23372 (Cluster_12529) 343.1131/0.60, p: 0.949")
-print("feature in negative mode: Cluster_25099 (Cluster_12529) 387.1139/0.60, p: 0.962")
-print("feature in negative mode: Cluster_039783 (Cluster_031642) 341.1086/0.62, p: 0.917")
-print("feature in negative mode: Cluster_046240 (Cluster_031642) 387.1140/0.62, p: 0.927")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 387.1139, rt = 0.60)
-#print("SALK_027837, neg, repl. 1: 387.1145 /0.70")
-#perform_ttest(pl = pl_sel[2,], line = "SALK_027837_5", n = n_rep_neg, "greater")
-#print("SALK_081021, SALK_027837, neg, repl. 1: 387.1145 /0.70")
-#perform_ttest(pl = pl_sel[2,], line = "SALK_081021_6", n = n_rep_neg, "greater")[col0]
-#pl_sel <- get_metabolite(pl = rep2_neg, mz = 387.1139, rt = 0.60)
-#print("SALK_027837, neg, repl. 2: 387.1145/0.70")
-#perform_ttest(pl = pl_sel, line = "SALK_027837_5", n = n_rep_neg, "greater")
-#print("SALK_081021, neg, repl. 2: 387.1145/0.70")
-#perform_ttest(pl = pl_sel[2,], line = "SALK_081021_6", n = n_rep_neg, "greater")[col0]
+features[["Cluster_12529/Cluster_031642"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_42473/Cluster_090187")
 pl_sel <- get_metabolite(pl = rep1, mz = 280.1539, rt = 4.87)
-#print("280.1540/5.50") ## [1, ]
-#print("280.1543/5.36")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_037430_4", n = n_rep1)
-#print("SALK_037430, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_020876_4", n = n_rep1)
-#print("SALK_020876, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_027837_5", n = n_rep1)
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_081021_6", n = n_rep1)
-#print("SALK_081021, not significant for col0 and salk")
-print("no corresonding feature in negative mode in rep1_neg and rep2_neg")
-
+print("280.1543/5.36")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_42473/Cluster_090187"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_55389/Cluster_121272")
 pl_sel <- get_metabolite(pl = rep1, mz = 437.1441, rt = 6.98)
 print("437.1441/6.98")
-#perform_ttest(pl = pl_sel, line = "SALK_037430_4", n = n_rep1)
-print("SALK_037430, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_020876_4", n = n_rep1)
-print("SALK_020876, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_027837_5", n = n_rep1)
-print("SALK_027837, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_081021_6", n = n_rep1)[col0]
-print("SALK_081021, not significant for salk")
-print("feature in negative mode: Cluster_35414 (Cluster_55389) 597.1827/6.94, p: 0.711")
-print("feature in negative mode: Cluster_075736 (Cluster_121272) 597.1826/7.02, p: 0.958")
-print("feature in negative mode: Cluster_081516 (Cluster_121272) 643.1884/7.02, p: 0.981")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 643.1884, rt = 7.02)
-print("SALK_027837, neg, repl. 1: 643.1882/6.96, alternative: less (Col0)")
-perform_ttest(pl = pl_sel, line = "SALK_081021_6", n = n_rep_neg, "less")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 643.1884, rt = 7.02)
-print("SALK_081021, neg, repl. 2: 387.1145 /0.70, alternative: less (Col0)")
-perform_ttest(pl = pl_sel, line = "SALK_081021_6", n = n_rep_neg, "greater")[col0]
+features[["Cluster_55389/Cluster_121272"]] <- rownames(pl_sel)
 
 print("## Cluster_59049/Cluster_129762")
 pl_sel <- get_metabolite(pl = rep1, mz = 488.2265, rt = 6.31)
@@ -1600,77 +1442,67 @@ print("feature not found in repl. 1")
 
 print("## Cluster_66746/Cluster_149630")
 pl_sel <- get_metabolite(pl = rep1, mz = 620.2662, rt = 6.62)
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_008908_3", n = 1)
-print("no corresonding feature in negative mode in rep1_neg and rep2_neg")
+print("## 620.2704/6.83")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_66746/Cluster_149630"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_67521/Cluster_151820")
 pl_sel <- get_metabolite(pl = rep1, mz = 638.2807, rt = 4.87)
 print("## 638.2807/4.89")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_037430_4", n = n_rep1)[col0]
-print("SALK_037430, not significant for salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_020876_4", n = n_rep1)[col0]
-print("SALK_020876, not significant for salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_027837_5", n = n_rep1)[col0]
-print("SALK_027837, not significant for salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_081021_6", n = n_rep1)[col0]
-print("SALK_081021, not significant for salk")
-print("## feature in negative mode: Cluster_42555 (Cluster_67521) 728.2757/4.87, p: 0.727")
-print("## no corresponding feature in negative mode in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 728.2757, rt = 4.87)
-print("no feature found in rep1_neg")
-#perform_ttest(pl = pl_sel_rep1_neg, line = "SALK_081021_6", n = 2, "less")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 728.2757, rt = 4.87)
-print("SALK_037430, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_037430_4", n = n_rep_neg, "less")[col0]
-print("SALK_020876, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_020876_4", n = n_rep_neg, "less")[col0]
-print("SALK_027837, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_027837_5", n = n_rep_neg, "less")[col0]
-print("SALK_081021, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_081021_6", n = n_rep_neg, "less")[col0]
+features[["Cluster_67521/Cluster_151820"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_67524/Cluster_151820")
 pl_sel <- get_metabolite(pl = rep1, mz = 638.2800, rt = 5.06)
 print("638.2807/4.89")
-#perform_ttest(pl = pl_sel[4, ], line = "SALK_037430_4", n = n_rep1)[col0]
-print("SALK_037430, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_020876_4", n = n_rep1)[col0]
-print("SALK_020876, not significant for salk")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_027837_5", n = n_rep1)[col0]
-print("SALK_027837, not significant for salk")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_081021_6", n = n_rep1)[col0]
-print("SALK_081021, not significant for salk")
-print("## feature in negative mode: Cluster_42557 (Cluster_67524) 728.2774/5.04, p: 0.709")
-pl_sel_rep1_neg <- get_metabolite(pl = rep1_neg, mz = 728.2757, rt = 5.04)
-print("## no feature found in rep1_neg")
-#perform_ttest(pl = pl_sel_rep1_neg, line = "SALK_081021_6", n = 2, "less")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 728.2757, rt = 4.76)
-#print("SALK_037430, neg, repl. 2: 728.2783/4.77")
-#perform_ttest(pl = pl_sel, line = "SALK_037430_4", n = n_rep1, "less")[col0]
-print("SALK_020876, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_020876_4", n = n_rep1, "less")[col0]
-print("SALK_027837, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_027837_5", n = n_rep1, "less")[col0]
-print("SALK_081021, neg, repl. 2: 728.2783/4.77")
-perform_ttest(pl = pl_sel, line = "SALK_081021_6", n = n_rep1, "less")[col0]
+features[["Cluster_67524/Cluster_151820"]] <- rownames(pl_sel[4, ])
 
 print("## Cluster_68035/Cluster_153194")
 pl_sel <- get_metabolite(pl = rep1, mz = 650.2792, rt = 6.29)
 print("## 650.2805/6.28")
-print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_68035/Cluster_153194"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_68765/Cluster_155231")
 pl_sel <- get_metabolite(pl = rep1, mz = 668.2914, rt = 5.10)
 print("668.2914/5.10")
-##perform_ttest(pl = pl_sel[3, ], line = "SALK_081021_6", n = n)[col0]
-print("no corresponding feature in negative mode in rep1_neg and rep2_neg")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_68765/Cluster_155231"]] <- rownames(pl_sel[3, ])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_037430_4")
+print("Col0/SALK_037430")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_037430_4")
+rmarkdown::paged_table(tt[["salk"]])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_020876_4")
+print("Col0/SALK_020876")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_020876")
+rmarkdown::paged_table(tt[["salk"]])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_027837_5")
+print("Col0/SALK_027837")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_027837")
+rmarkdown::paged_table(tt[["salk"]])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_081021_6")
+print("Col0/SALK_081021")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_081021")
+rmarkdown::paged_table(tt[["salk"]])
+
+
 ```
 
 #### SALK_072964
 
 ```{r ttests_neg_SALK_072964, echo=FALSE}
-n_rep1 <- 2
-n_rep_neg <- 2
+features <- list()
 
 print("## Cluster_06135/Cluster_0000812")
 pl_sel <- get_metabolite(pl = rep1, mz = 256.5569, rt = 3.70)
@@ -1695,26 +1527,13 @@ print("## feature not found in repl. 1")
 print("## Cluster_43637/Cluster_019842")
 pl_sel <- get_metabolite(pl = rep1, mz = 292.0752, rt = 4.14)
 print("292.0752/4.13")
-perform_ttest(pl = pl_sel, line = "SALK_072964_5", n = n_rep1)
-print("## feature in negative mode: Cluster_31590 (Cluster_43637) 529.1178/3.85, p: 0.708")
-print("## feature in negative mode: Cluster_056944 (Cluster_019842) 461.1307/3.95, p: 0.747")
-print("## feature in negative mode: Cluster_066227 (Cluster_019842) 529.1180/3.95, p: 0.814")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 529.1178, rt = 3.85)
-print("SALK_072964, neg, repl. 1: 529.1177/3.91")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_072964_5", n = n_rep_neg, "greater")
-#print("SALK_072964, neg, repl. 1: 529.1178/3.69")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_072964_5", n = n_rep_neg, "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 529.1180, rt = 3.95)
-print("SALK_072964, neg, repl. 2: 529.1173/4.41")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_072964_5", n = n_rep_neg, "greater")
-#print("SALK_072964, neg, repl. 2: 529.1149/3.33")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_072964_5", n = n_rep_neg, "greater")
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_43637/Cluster_019842"]] <- rownames(pl_sel)
 
 print("## Cluster_51292/Cluster_111920")
 pl_sel <- get_metabolite(pl = rep1, mz = 386.1802, rt = 2.74)
 print("386.1811/2.78")
-#perform_ttest(pl = pl_sel, line = "SALK_072964_5", n = n_rep1)[salk]
-print("## feature in negative mode: Cluster_29089 (Cluster_51292) 476.1773/2.73, p: 0.738")
+features[["Cluster_51292/Cluster_111920"]] <- rownames(pl_sel)
 print("no corresponding feature in repl. 2 neg")
 
 print("## Cluster_56806/Cluster_124429")
@@ -1724,24 +1543,8 @@ print("## feature not found in repl. 1")
 print("## Cluster_58858/Cluster_129269")
 pl_sel <- get_metabolite(pl = rep1, mz = 485.1268, rt = 3.92)
 print("485.1268/3.91")
-perform_ttest(pl = pl_sel[3, ], line = "SALK_072964_5", n = n_rep1)
-print("## feature in negative mode: Cluster_31590 (Cluster_58858) 529.1178/3.85, p: 0.793")
-print("## feature in negative mode: Cluster_056944 (Cluster_129269) 461.1307/3.95, p: 0.88")
-print("## feature in negative mode: Cluster_066227 (Cluster_129269) 529.1180/3.95, p: 0.83")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 529.1178, rt = 3.85)
-print("SALK_072964, neg, repl. 1: 529.1177/3.91, alternative: less (Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_072964_5", n = n_rep_neg, "less")[col0]
-print("SALK_072964, neg, repl. 1: 529.1177/3.91, alternative: greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_072964_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 529.1180, rt = 3.95)
-print("SALK_072964, neg, repl. 2: 529.1173/4.41, alternative: less (Col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_072964_5", n = n_rep_neg, "less")[col0]
-print("SALK_072964, neg, repl. 2: 529.1173/4.41, alternative: greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_072964_5", n = n_rep_neg, "greater")[salk]
-print("SALK_072964, neg, repl. 2: 529.1149/3.33, less (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_072964_5", n = n_rep_neg, "less")[col0]
-print("SALK_072964, neg, repl. 2: 529.1149/3.33, greater (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_072964_5", n = n_rep_neg, "less")[salk]
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_58858/Cluster_129269"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_59828/Cluster_131856")
 pl_sel <- get_metabolite(pl = rep1, mz = 501.1081, rt = 3.70)
@@ -1754,20 +1557,13 @@ print("## feature not found in repl. 1")
 print("## Cluster_61036/Cluster_134803")
 pl_sel <- get_metabolite(pl = rep1, mz = 518.2228, rt = 2.99)
 print("518.2235/3.28")
-#perform_ttest(pl = pl_sel, line = "SALK_072964_5", n = n_rep_neg)[salk]
-print("SALK_072964, not significant for Col0")
-print("no corresponding feature in negative repl. 1")
-print("## feature in negative mode: Cluster_077152 (Cluster_134803) 608.2199/3.28, p: 0.77")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 608.2199, rt = 3.28)
-print("no feature in rep2_neg")
+features[["Cluster_61036/Cluster_134803"]] <- rownames(pl_sel)
+print("no corresponding feature in rep2_neg")
 
-print("## Cluster_61038/Cluster_134803")
-pl_sel <- get_metabolite(pl = rep1, mz = 518.2225, rt = 3.25)
+#print("## Cluster_61038/Cluster_134803")
+#pl_sel <- get_metabolite(pl = rep1, mz = 518.2225, rt = 3.25)
 #print("518.2235/3.28")
-#perform_ttest(pl = pl_sel, line = "SALK_072964_5", n = n_rep_neg)[salk]
-print("no corresponding feature in negative repl. 1")
-print("## feature in negative mode: Cluster_077152 (Cluster_134803) 608.2199/3.28, p: 0.77")
-print("no feature in rep2_neg")
+#features[["Cluster_61038/Cluster_134803"]] <- rownames(pl_sel)
 
 print("## Cluster_62024/Cluster_137155")
 pl_sel <- get_metabolite(pl = rep1, mz = 533.0576, rt = 3.70)
@@ -1776,16 +1572,8 @@ print("## feature not found in repl. 1")
 print("## Cluster_62414/Cluster_138008")
 pl_sel <- get_metabolite(pl = rep1, mz = 538.1556, rt = 5.04)
 print("538.1556/5.04")
-##perform_ttest(pl = pl_sel[2, ], line = "SALK_072964_5", n = n)
-print("no corresponding feature in rep1_neg")
-print("## feature in negative mode: Cluster_067181 (Cluster_138008) 536.1412/5.07, p: 0.83")
-print("## feature in negative mode: Cluster_100876 (Cluster_138008) 845.2310/5.07, p: 0.83")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 536.1412, rt = 5.07)
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 536.1412, rt = 5.07)
-print("no feature in pl_rep_2_neg")
-#print("SALK_072964, neg, repl. 2: 529.1149/3.33, greater (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_072964_5", n = n_rep_neg, "less")[salk]
-
+print("no corresponding feature in rep1_neg and rep2_neg")
+#features[["Cluster_62414/Cluster_138008"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_62876/Cluster_139378")
 pl_sel <- get_metabolite(pl = rep1, mz = 547.0962, rt = 3.85)
@@ -1794,11 +1582,13 @@ print("## feature not found in repl. 1")
 print("## Cluster_62980/Cluster_139652")
 pl_sel <- get_metabolite(pl = rep1, mz = 548.2337, rt = 3.40)
 print("## 548.2337/3.39")
+#features[["Cluster_62980/Cluster_139652"]] <- rownames(pl_sel)
 print("no corresponding feature in negative repl. 1 and repl. 2")
 
 print("## Cluster_62981/Cluster_139652")
 pl_sel <- get_metabolite(pl = rep1, mz = 548.2337, rt = 3.40)
 print("## 548.2337/3.39")
+#features[["Cluster_62981/Cluster_139652"]] <- rownames(pl_sel)
 print("no corresponding feature in negative repl. 1 and repl. 2")
 
 print("## Cluster_67946/Cluster_152970")
@@ -1808,6 +1598,7 @@ print("## feature not found in repl. 1")
 print("## Cluster_70637/Cluster_160826")
 pl_sel <- get_metabolite(pl = rep1, mz = 724.2813, rt = 6.03)
 print("## 724.2813/6.03")
+#features[["Cluster_70637/Cluster_160826"]] <- rownames(pl_sel)
 print("no corresponding feature in negative repl. 1 and repl. 2")
 
 print("## Cluster_70643/Cluster_160829")
@@ -1821,200 +1612,99 @@ print("## feature not found in repl. 1")
 print("## Cluster_74283/Cluster_171756")
 pl_sel <- get_metabolite(pl = rep1, mz = 872.3333, rt = 7.45)
 print("## 872.3333/7.45")
+#features[["Cluster_74283/Cluster_171756"]] <- rownames(pl_sel)
 print("no corresponding feature in negative repl. 1 and repl. 2")
 
 print("## Cluster_74692/Cluster_172731")
 pl_sel <- get_metabolite(pl = rep1, mz = 890.3421, rt = 6.20)
 print("## feature not found in repl. 1")
+
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_072964_5")
+print("Col0")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK")
+rmarkdown::paged_table(tt[["salk"]])
 ```
 
 #### SALK_024438
 
 ```{r ttests_pos_SALK_024438, echo=FALSE}
-n_rep1 <- 9
-n_rep_neg <- 8
+features <- list()
 
 print("## Cluster_17329/Cluster_040833")
 pl_sel <- get_metabolite(pl = rep1, mz = 517.0257, rt = 6.39)
 print("## 517.0257/6.38")
-perform_ttest(pl = pl_sel, line = "SALK_024438_5", n = n_rep1)[salk]
-print("## feature in negative mode: Cluster_059172 (Cluster_040833) 477.0641/6.53, p: 0.87")
-print("## feature in negative mode: Cluster_068290 (Cluster_040833) 544.0472/6.53, p: 0.84")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.53)
-print("SALK_024438, neg, repl. 1: 477.0650/7.01, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.53)
-print("SALK_024438, neg, repl. 2: 477.0650/7.00, greater (salk)")
-perform_ttest(pl = pl_sel[4, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-
+features[["Cluster_17329/Cluster_040833"]] <- rownames(pl_sel)
 
 print("## Cluster_26090/Cluster_056574")
 pl_sel <- get_metabolite(pl = rep1, mz = 117.0575, rt = 6.37)
 print("## 117.0575/6.38")
-perform_ttest(pl = pl_sel, line = "SALK_024438_5", n = n_rep1)[salk]
-print("## feature in negative mode: Cluster_29119 (Cluster_26090) 477.0638/6.32, p: 0.79")
-print("## feature in negative mode: Cluster_35940 (Cluster_26090) 607.0222/6.32, p: 0.75")
-print("## feature in negative mode: Cluster_29119 (Cluster_056574) 477.0641/6.53, p: 0.73")
-print("## feature in negative mode: Cluster_35940 (Cluster_056574) 544.0472/6.53, p: 0.70")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "less")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "less")[salk]
-
+features[["Cluster_26090/Cluster_056574"]] <- rownames(pl_sel)
 
 print("## Cluster_27226/Cluster_059204")
 pl_sel <- get_metabolite(pl = rep1, mz = 130.0652, rt = 6.38)
 print("130.0652/6.38")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep1)[salk]
-print("SALK_024438, not significant for col0")
-print("## feature in negative mode: Cluster_29119 (Cluster_27226) 477.0638/6.32, p: 0.82")
-print("## feature in negative mode: Cluster_059172 (Cluster_059204) 477.0641/6.53, p: 0.93")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-#print("SALK_024438, neg, repl. 1: 477.0650/6.37, less (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-#print("SALK_024438, neg, repl. 2: 477.0650/6.48, less (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-
+features[["Cluster_27226/Cluster_059204"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_30238/Cluster_066189")
 pl_sel <- get_metabolite(pl = rep1, mz = 160.0757, rt = 6.37)
-## 3 160.0757/6.38
-perform_ttest(pl = pl_sel[3, ], line = "SALK_024438_5", n = n_rep1)[salk]
-print("SALK_024438, not significant for col0")
-print("## feature in negative mode: Cluster_29119 (Cluster_30238) 477.0638/6.32, p: 0.91")
-print("## feature in negative mode: Cluster_35940 (Cluster_30238) 607.0222/6.32, p: 0.73")
-print("## feature in negative mode: Cluster_059172 (Cluster_066189) 477.0641/6.53, p: 0.81")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-#print("SALK_024438, neg, repl. 1: 477.0650/6.37, less (Col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-#print("SALK_024438, neg, repl. 2: 477.0650/6.48, less (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-
-
+print("## 160.0757/6.38")
+features[["Cluster_30238/Cluster_066189"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_34740/Cluster_075680")
 pl_sel <- get_metabolite(pl = rep1, mz = 206.0507, rt = 6.38)
 print("## 206.0507/6.38")
-#perform_ttest(pl = pl_sel, line = "SALK_024438_5", n = n_rep1)[col0]
-print("SALK_024438, not significant for col0 and salk")
-print("## feature in negative mode: Cluster_29119 (Cluster_34740) 477.0638/6.32, p: 0.77")
-print("## feature in negative mode: Cluster_35940 (Cluster_34740) 607.0222/6.32, p: 0.77")
-print("## feature in negative mode: Cluster_36285 (Cluster_34740) 613.0401/6.32, p: 0.71")
-print("## feature in negative mode: Cluster_059172 (Cluster_075680) 477.0641/6.53, p: 0.73")
-print("## feature in negative mode: Cluster_077756 (Cluster_075680) 613.0390/6.53, p: 0.78")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 613.0390, rt = 6.53)
-#print("SALK_024438, neg, repl. 1: 613.0398/6.38, less (Col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 613.0390, rt = 6.53)
-#print("SALK_024438, neg, repl. 2: 613.0476/7.00, less (col0)")
-#perform_ttest(pl = pl_sel, line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-
+features[["Cluster_34740/Cluster_075680"]] <- rownames(pl_sel)
 
 print("## Cluster_37887/Cluster_081532")
 pl_sel <- get_metabolite(pl = rep1, mz = 237.0688, rt = 6.33)
 print("## 237.0691/6.38")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep1)
-print("## feature in negative mode: Cluster_29119 (Cluster_37887) 477.0638/6.32, p: 0.807")
-print("## feature in negative mode: Cluster_059172 (Cluster_081532) 477.0641/6.35, p: 0.839")
-print("## feature in negative mode: Cluster_068290 (Cluster_081532) 544.0472/6.54, p: 0.777")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, less (Col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, less (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-
+features[["Cluster_37887/Cluster_081532"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_50972/Cluster_111188")
 pl_sel <- get_metabolite(pl = rep1, mz = 383.1272, rt = 6.37)
 print("## 383.1272/6.38")
-print("no corresponding feature in negative repl. 1 and repl. 2")
+#features[["Cluster_50972/Cluster_111188"]] <- rownames(pl_sel)
+print("no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## Cluster_52306/Cluster_114291")
 pl_sel <- get_metabolite(pl = rep1, mz = 399.1222, rt = 6.38)
 print("399.1222/6.38")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep1)[salk]
-print("## feature in negative mode: Cluster_29119 (Cluster_52306) 477.0638/6.32, p: 0.78")
-print("## feature in negative mode: Cluster_32425 (Cluster_52306) 545.0517/6.32, p: 0.85")
-print("## feature in negative mode: Cluster_059172 (Cluster_114291) 477.0641/6.53, p: 0.89")
-print("## feature in negative mode: Cluster_068290 (Cluster_114291) 544.0472/6.53, p: 0.85")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-
-
-
+features[["Cluster_52306/Cluster_114291"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_53874/Cluster_117717")
 pl_sel <- get_metabolite(pl = rep1, mz = 417.1407, rt = 8.21)
 print("## 417.1407/8.21")
+#features[["Cluster_53874/Cluster_117717"]] <- rownames(pl_sel[2, ])
 print("no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## ## Cluster_54142/Cluster_118315")
 pl_sel <- get_metabolite(pl = rep1, mz = 421.1041, rt = 6.38)
 print("## 421.1041/6.38")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep1)
-print("## feature in negative mode: Cluster_29119 (Cluster_54142) 477.0638/6.32, p: 0.795")
-print("## no corresponding feature in negative mode in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, less (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, less (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "less")[col0]
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-
-
-
+features[["Cluster_54142/Cluster_118315"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_63530/Cluster_140991")
 pl_sel <- get_metabolite(pl = rep1, mz = 558.0525, rt = 6.39)
 print("558.0525/6.38")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep1)[salk]
-print("SALK_024438, not significant for col0")
-print("## feature in negative mode: Cluster_29119 (Cluster_63530) 477.0638/6.32, p: 0.73")
-print("no corresponding feature in negative mode in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 1: 477.0650/6.37, greater (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 477.0641, rt = 6.32)
-print("SALK_024438, neg, repl. 2: 477.0650/6.48, greater (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_024438_5", n = n_rep_neg, "greater")[salk]
+features[["Cluster_63530/Cluster_140991"]] <- rownames(pl_sel[2, ])
 
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_024438_5")
+print("Col0")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK")
+rmarkdown::paged_table(tt[["salk"]])
 ```
 
 
 #### SALK_011180/SALK_021216/SALK_049338
 
 
-
-```{r ttests_pos_salk_011180_salk_021216_salk_049338}
-######################## continue from here ####################################
-################ with adjusting the n's for ttests #############################
-n_rep1 <- 27
-n_rep_neg <- 1
+```{r ttests_pos_salk_011180_salk_021216_salk_049338, echo = FALSE}
+features <- list()
 
 print("## Cluster_06008/Cluster_014813")
 pl_sel <- get_metabolite(pl = rep1, mz = 252.0279, rt = 6.95)
@@ -2027,103 +1717,35 @@ print("## feature not found in repl. 1")
 print("## Cluster_06373/Cluster_016278")
 pl_sel <- get_metabolite(pl = rep1, mz = 264.5441, rt = 7.73)
 print("264.5441/7.73")
+#features[["Cluster_06373/Cluster_016278"]] <- rownames(pl_sel[1, ])
 print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## Cluster_06681/Cluster_017447")
 pl_sel <- get_metabolite(pl = rep1, mz = 272.5417, rt = 7.08)
 print("## 272.5417/7.08")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1) 
-print("SALK_011180, no significant features for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)
-print("SALK_021216, no significant features for col0 and salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-print("## no corresponding feature in negative mode in rep1_neg")
-print("## feature in negative mode: Cluster_066469 (Cluster_017447) 531.0758/7.02, p: 0.803")
-print("## feature in negative mode: Cluster_075949 (Cluster_017447) 599.0758/7.02, p: 0.880")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 531.0758, rt = 7.08)
-print("neg/repl. 1, SALK_049338, 531.0764/7.06, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 531.0758, rt = 7.02)
-print("neg/repl. 2, SALK_049338, 531.0764/7.02, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_06681/Cluster_017447"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_06683/Cluster_088569")
 pl_sel <- get_metabolite(pl = rep1, mz = 272.5416, rt = 6.19)
 print("# 272.5416/6.19")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, no significant feature for salk and col0")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, no significant feature for col0")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)
-print("## no corresponding feature in negative mode in rep1_neg")
-print("## feature in negative mode: Cluster_077251 (Cluster_088569) 609.1467/6.11, p: 0.80")
-print("## feature in negative mode: Cluster_081769 (Cluster_088569) 645.1229/6.11, p: 0.94")
-print("## feature in negative mode: Cluster_085577 (Cluster_088569) 677.1344/6.11, p: 0.82")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 645.1229, rt = 6.19)
-print("neg/repl. 1, SALK_021216, 645.1229/6.19, alternative: less (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 645.1229/6.19, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 645.1229, rt = 6.19)
-print("neg/repl. 2, SALK_021216, 645.1233/6.14, alternative: less (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 645.1233/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_06683/Cluster_088569"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_06986/Cluster_018383")
 pl_sel <- get_metabolite(pl = rep1, mz = 280.5279, rt = 7.07)
 print("280.5279/7.07")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep1)
-print("SALK_021216, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep1)
-print("## feature in negative mode: Cluster_31680 (Cluster_06986) 531.0760/6.94, p: 0.85")
-print("## feature in negative mode: Cluster_075949 (Cluster_018383) 599.0629/7.03, p: 0.71")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 531.0758, rt = 7.08)
-print("neg/repl. 1, SALK_049338, 531.0764/7.06, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 531.0758, rt = 7.02)
-print("neg/repl. 2, SALK_049338, 531.0764/7.02, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
-
+features[["Cluster_06986/Cluster_018383"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_06988/Cluster_018381")
 pl_sel <- get_metabolite(pl = rep1, mz = 280.5278, rt = 6.19)
 print("## 280.5278/6.19")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)[salk]
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[salk]
-print("SALK_021216, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-#print("## feature in negative mode: Cluster_43398 (Cluster_06988) 745.1224/6.05, p: 0.91")
-#print("## feature in negative mode: Cluster_42266 (Cluster_06988) 723.1390/6.05, p: 0.89")
-#print("## feature in negative mode: Cluster_081769 (Cluster_018381) 645.1229/6.11, p: 0.86")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 745.1224, rt = 7.08)
-#print("neg/repl. 1, SALK_011180, 745.1216/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_021216, 745.1216/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 1, SALK_049338, 745.1216/6.18, alternative: greater (col0 and salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 745.1224, rt = 7.02)
-#print("neg/repl. 2, SALK_011180, 745.1221/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 2, SALK_021216, 745.1221/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 745.1221/6.13, alternative: greater (col0 and salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+#features[["Cluster_06988/Cluster_018381"]] <- rownames(pl_sel[2, ])
+print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## Cluster_07141/Cluster_018968")
 pl_sel <- get_metabolite(pl = rep1, mz = 285.0575, rt = 7.73)
 print("285.0575/7.73")
+#features[["Cluster_07141/Cluster_018968"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature found in rep1_neg and rep2_neg")
-
 
 print("## Cluster_07450/Cluster_020032")
 pl_sel <- get_metabolite(pl = rep1, mz = 293.0544, rt = 6.95)
@@ -2132,27 +1754,8 @@ print("## feature not found in repl. 1")
 print("## Cluster_07452/Cluster_020029")
 pl_sel <- get_metabolite(pl = rep1, mz = 293.0550, rt = 6.20)
 print("## 293.0550/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ##"less"
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_43398 (Cluster_07452) 745.1224/6.05, p: 0.92")
-print("## feature in negative mode: Cluster_39933 (Cluster_07452) 677.1342/6.05, p: 0.96")
-print("## feature in negative mode: Cluster_081769 (Cluster_020029) 645.1229/6.11, p: 0.97")
-print("## feature in negative mode: Cluster_077251 (Cluster_020029) 609.1467/6.11, p: 0.82")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 1, SALK_021216, 677.1342/6.19, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1342/6.19, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
-
+#features[["Cluster_07452/Cluster_020029"]] <- rownames(pl_sel)
+print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## Cluster_08668/Cluster_022989")
 pl_sel <- get_metabolite(pl = rep1, mz = 316.0516, rt = 6.05)
@@ -2161,127 +1764,35 @@ print("## feature not found in repl. 1")
 print("## Cluster_08715/Cluster_023102")
 pl_sel <- get_metabolite(pl = rep1, mz = 317.0687, rt = 6.19)
 print("317.0687/6.19")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1) ## greater
-print("no corresponding feature in rep1_neg")
-print("## feature in negative mode: Cluster_081769 (Cluster_023102) 645.1229/6.11, p: 0.84")
-print("## feature in negative mode: Cluster_077251 (Cluster_023102) 609.1467/6.11, p: 0.73")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 645.1229, rt = 6.11)
-print("neg/repl. 1, SALK_011180, 645.1229/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 645.1229/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 645.1229/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 645.1229, rt = 6.11)
-print("neg/repl. 2, SALK_011180, 645.1233/6.14, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 645.1233/6.14, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 645.1233/6.14, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+#features[["Cluster_08715/Cluster_023102"]] <- rownames(pl_sel[2, ])
+print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## Cluster_08716/Cluster_023104")
 pl_sel <- get_metabolite(pl = rep1, mz = 317.0600, rt = 6.65)
 print("317.0600/6.65")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for salk and col0")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[col0] ## greater
-print("SALK_021216, not significant for salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)[col0] ## greater
-print("SALK_049338, not significant for salk")
-print("## feature in negative mode: Cluster_39122 (Cluster_08716) 661.1390/6.42, p: 0.87")
-print("## feature in negative mode: Cluster_40669 (Cluster_08716) 692.0684/6.42, p: 0.73")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 661.1390, rt = 6.42)
-print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 661.1390/6.73, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 661.1390, rt = 6.42)
-print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 661.1393/6.66, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")[col0]
-
+features[["Cluster_08716/Cluster_023104"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_09093/Cluster_024151")
 pl_sel <- get_metabolite(pl = rep1, mz = 280.5279, rt = 7.07)
 print("## 280.5279/7.07")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep1)
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep1)
-perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_40669 (Cluster_09093) 692.0684/6.42, p: 0.84")
-print("## feature in negative mode: Cluster_42264 (Cluster_09093) 723.1090/6.42, p: 0.84")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 692.0684, rt = 6.42)
-print("neg/repl. 1, SALK_049338, 692.0688/6.73, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 692.0684, rt = 6.42)
-print("neg/repl. 2, SALK_049338, 692.0690/6.67, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+print("feature already selected (Cluster_06986/Cluster_018383)")
+##features[["Cluster_09093/Cluster_024151"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_09094/Cluster_024158")
 pl_sel <- get_metabolite(pl = rep1, mz = 325.0573, rt = 6.19)
 print("## 325.0573/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1) ## greater, less
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39933 (Cluster_09094) 677.1342/6.05, p: 0.70")
-print("## feature in negative mode: Cluster_081769 (Cluster_024158) 654.1229/6.11, p: 0.74")
-print("## feature in negative mode: Cluster_085577 (Cluster_024158) 677.1344/6.11, p: 0.73")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.11)
-#print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_09094/Cluster_024158"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_09432/Cluster_024930")
 pl_sel <- get_metabolite(pl = rep1, mz = 332.0652, rt = 6.80)
 print("## 332.0652/6.80")
+#features[["Cluster_09432/Cluster_024930"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_09699/Cluster_025580")
 pl_sel <- get_metabolite(pl = rep1, mz = 337.5724, rt = 6.43)
 print("## 337.5731/6.65")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for salk and col0")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)
-print("SALK_021216, not significant for salk and col0")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)[col0] ## greater
-print("SALK_049338, not significant for and col0 salk")
-print("## feature in negative mode: Cluster_39122 (Cluster_09699) 661.1390/6.42, p: 0.81")
-print("## feature in negative mode: Cluster_40669 (Cluster_09699) 692.0684/6.42, p: 0.70")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 661.1390, rt = 6.42)
-print("neg/repl. 1, SALK_049338, 661.1390/6.73, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 661.1390, rt = 6.42)
-print("neg/repl. 2, SALK_049338, 661.1393/6.66, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")[col0]
+features[["Cluster_09699/Cluster_025580"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_10037/Cluster_026320")
 pl_sel <- get_metabolite(pl = rep1, mz = 344.0296, rt = 6.05)
@@ -2290,29 +1801,7 @@ print("## feature not found in repl. 1")
 print("## Cluster_10100/Cluster_026502")
 pl_sel <- get_metabolite(pl = rep1, mz = 345.5706, rt = 6.19)
 print("## 345.57/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[salk] ## less
-print("SALK_011180, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39933 (Cluster_10100) 677.1342/6.05, p: 0.82")
-print("## feature in negative mode: Cluster_43398 (Cluster_10100) 745.1224/6.02, p: 0.75")
-print("## feature in negative mode: Cluster_081769 (Cluster_026502) 645.1229/6.11, p: 0.76")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_10100/Cluster_026502"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_10181/Cluster_026758")
 pl_sel <- get_metabolite(pl = rep1, mz = 347.5665, rt = 6.05)
@@ -2321,100 +1810,36 @@ print("## feature not found in repl. 1")
 print("## Cluster_10475/Cluster_027427")
 pl_sel <- get_metabolite(pl = rep1, mz = 353.5568, rt = 6.19)
 print("# 353.5568/6.19")
+#features[["Cluster_10475/Cluster_027427"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
-
 
 print("## Cluster_10527/Cluster_027529")
 pl_sel <- get_metabolite(pl = rep1, mz = 354.5584, rt = 6.19)
 print("## 354.5584/371.5415")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[salk] ## less
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_43398 (Cluster_10527) 745.1224/6.05, p: 0.90")
-print("## feature in negative mode: Cluster_42266 (Cluster_10527) 723.1390/6.05, p: 0.85")
-print("## feature in negative mode: Cluster_081769 (Cluster_027529) 645.1229/6.11, p: 0.91")
-print("## feature in negative mode: Cluster_077251 (Cluster_027529) 609.1466/6.11, p: 0.79")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 745.1224, rt = 6.05)
-#print("neg/repl. 1, SALK_011180, 745.1216/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_021216, 745.1216/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 745.1216/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 745.1224, rt = 6.05)
-#print("neg/repl. 2, SALK_011180, 745.1221/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_021216, 745.1221/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 745.1221/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+#features[["Cluster_10527/Cluster_027529"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_10723/Cluster_027886")
 pl_sel <- get_metabolite(pl = rep1, mz = 358.0864, rt = 6.73)
 print("## 358.0864/6.73")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-print("## feature in negative mode: Cluster_39122 (Cluster_10723) 661.1390/6.42, p: 0.85")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 661.1390, rt = 6.42)
-print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 661.1390, rt = 6.42)
-print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
+features[["Cluster_10723/Cluster_027886"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_10854/Cluster_028123")
 pl_sel <- get_metabolite(pl = rep1, mz = 360.5646, rt = 6.80)
 print("## 360.5646/6.79")
+#features[["Cluster_10854/Cluster_028123"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_11067/Cluster_028666")
 pl_sel <- get_metabolite(pl = rep1, mz = 366.0840, rt = 6.19)
 print("## SALK_011180_5, 366.0840/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK)911180, not significant for salk")
-print("## SALK_021216_4, 366.0840/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-print("## SALK_049338_4, 366.0840/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39933 (Cluster_11067) 677.1342/6.05, p: 0.95")
-print("## feature in negative mode: Cluster_42266 (Cluster_11067) 723.1390/6.05, p: 0.82")
-print("## feature in negative mode: Cluster_081769 (Cluster_028666) 645.1229/6.11, p: 0.90")
-print("## feature in negative mode: Cluster_085577 (Cluster_028666) 677.1344/6.11, p: 0.79")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+#features[["Cluster_11067/Cluster_028666"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_11415/Cluster_029357")
 pl_sel <- get_metabolite(pl = rep1, mz = 373.0919, rt = 6.80)
 print("## 373.0919/6.78")
+#features[["Cluster_11415/Cluster_029357"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_13438/Cluster_033216")
@@ -2432,38 +1857,8 @@ print("feature not found in repl. 1")
 print("## Cluster_19567/Cluster_046010")
 pl_sel <- get_metabolite(pl = rep1, mz = 630.1343, rt = 6.20)
 print("## SALK_011180, 630.1343/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for col0 and salk")
-print("## SALK_021216, 630.1343/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1) ## greater, less
-print("SALK_021216, not significant for col0 and salk")
-print("## SALK_049338, 630.1343/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("SALK_049338, not significant for col0 and salk")
-#print("## feature in negative mode: Cluster_43398 (Cluster_19567) 745.1224/6.05, p: 0.77")
-#print("## feature in negative mode: Cluster_42464 (Cluster_19567) 727.0821/6.05, p: 0.77")
-#print("## feature in negative mode: Cluster_081769 (Cluster_046010) 645.1229/6.12, p: 0.80")
-#print("## feature in negative mode: Cluster_098526 (Cluster_046010) 813.1087/6.12, p: 0.71")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
-
+#features[["Cluster_19567/Cluster_046010"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_19968/Cluster_046902")
 pl_sel <- get_metabolite(pl = rep1, mz = 657.0921, rt = 6.05)
@@ -2472,55 +1867,14 @@ print("feature not found in repl. 1")
 print("## Cluster_20043/Cluster_047088")
 pl_sel <- get_metabolite(pl = rep1, mz = 664.0721, rt = 6.19)
 print("## SALK_011180, 665.0721/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1) ## greater, less
-print("SALK_011180, not significant for col0 and salk")
-print("## SALK_021216, 665.0721/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("## SALK_049338, 665.0721/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_46322 (Cluster_20043) 813.1080/6.05, p: 0.80")
-print("## feature in negative mode: Cluster_46078 (Cluster_20043) 807.0910/6.05, p: 0.78")
-print("## feature in negative mode: Cluster_077251 (Cluster_047088) 609.1466/6.11, p: 0.76")
-print("## feature in negative mode: Cluster_081769 (Cluster_047088) 645.1229/6.11, p: 0.83")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 645.1229, rt = 6.11)
-#print("neg/repl. 1, SALK_011180, 645.1229/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_011180, 645.1229/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 645.1229, rt = 6.11)
-#print("neg/repl. 2, SALK_011180, 645.1233/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_011180, 645.1233/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_021216, 645.1233/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 645.1233/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+#features[["Cluster_20043/Cluster_047088"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_20408/Cluster_157992")
 pl_sel <- get_metabolite(pl = rep1, mz = 695.1127, rt = 6.19)
 print("## 696.1127/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)
-print("SALK_049338, not significant for col0 and salk")
-print("## feature in negative mode: Cluster_39933 (Cluster_20408) 677.1342/6.05, p: 0.91")
-print("## feature in negative mode: Cluster_43398 (Cluster_20408) 745.1224/6.05, p: 0.84")
-print("## feature in negative mode: Cluster_077251 (Cluster_157992) 609.1466/6.11, p: 0.71")
-print("## feature in negative mode: Cluster_081769 (Cluster_157992) 645.1229/6.11, p: 0.70")
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-
+#features[["Cluster_20408/Cluster_157992"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_22101/Cluster_000699")
 pl_sel <- get_metabolite(pl = rep1, mz = 902.1905, rt = 6.05)
@@ -2533,91 +1887,29 @@ print("## feature not found in repl. 1")
 print("## Cluster_43184/Cluster_091479")
 pl_sel <- get_metabolite(pl = rep1, mz = 287.0545, rt = 6.65)
 print("## 287.0545/6.65")
-# perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39122 (Cluster_43184) 661.1390/6.42, p: 0.89")
-print("## feature in negative mode: Cluster_40669 (Cluster_43184) 692.0684/6.42, p: 0.75")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 661.1390, rt = 6.42)
-#print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 661.1390/6.73, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 661.1390, rt = 6.42)
-#print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 661.1393/6.66, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+features[["Cluster_43184/Cluster_091479"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_43185/Cluster_091480")
 pl_sel <- get_metabolite(pl = rep1, mz = 287.0545, rt = 6.65)
+#features[["Cluster_43185/Cluster_091480"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_43188/Cluster_091475")
 pl_sel <- get_metabolite(pl = rep1, mz = 287.0543, rt = 7.42)
 print("## 287.0547/7.42")
+#features[["Cluster_43188/Cluster_091475"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_44662/Cluster_094789")
 pl_sel <- get_metabolite(pl = rep1, mz = 303.0494, rt = 6.19)
 print("## 303.0494/6.19")
-#perform_ttest(pl = pl_sel[3, ], line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[3, ], line = "SALK_021216_4", n = n_rep1) ## greater, less
-perform_ttest(pl = pl_sel[3, ], line = "SALK_049338_4", n = n_rep1)[col0] ## greater
-print("SALK_049338, not significant for salk")
-print("## feature in negative mode: Cluster_39933 (Cluster_44662) 677.1342/6.05, p: 0.88")
-print("## feature in negative mode: Cluster_43398 (Cluster_44662) 745.1224/6.05, p: 0.83")
-print("## feature in negative mode: Cluster_081769 (Cluster_094789) 645.1229/6.11, p: 0.87")
-print("## feature in negative mode: Cluster_098526 (Cluster_094789) 813.1087/6.11, p: 0.74")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")[col0]
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")[col0]
-
+#features[["Cluster_44662/Cluster_094789"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_44666/Cluster_094774")
 pl_sel <- get_metabolite(pl = rep1, mz = 303.0498, rt = 7.08)
 print("## 303.0498/7.08")
-#perform_ttest(pl = pl_sel[5, ], line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel[5, ], line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[5, ], line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_31680 (Cluster_44666) 531.0759/6.94, p: 0.88")
-print("## feature in negative mode: Cluster_075949 (Cluster_094774) 599.0629/7.02, p: 0.85")
-print("## feature in negative mode: Cluster_066469 (Cluster_094774) 531.0758/7.02, p: 0.77")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 531.0759, rt = 6.94)
-#print("neg/repl. 1, SALK_021216, 531.0761/7.06, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 531.0761/7.06, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 531.0759, rt = 6.94)
-#print("neg/repl. 2, SALK_021216, 531.0764/7.00, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 531.0764/7.00, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_44666/Cluster_094774"]] <- rownames(pl_sel[5, ])
 
 print("## Cluster_55107/Cluster_120576")
 pl_sel <- get_metabolite(pl = rep1, mz = 433.1120, rt = 6.43)
@@ -2626,61 +1918,42 @@ print(" feature not found in repl. 1")
 print("## Cluster_55108/Cluster_120556")
 pl_sel <- get_metabolite(pl = rep1, mz = 433.1120, rt = 6.52)
 print("## 433.1133/6.93") ## 2
+#features[["Cluster_55108/Cluster_120556"]] <- rownames(pl_sel[2, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_56343/Cluster_123342")
 pl_sel <- get_metabolite(pl = rep1, mz = 449.1086, rt = 7.73)
 print("## 449.1086/7.73") ## 3
+#features[["Cluster_56343/Cluster_123342"]] <- rownames(pl_sel[3, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_56344/Cluster_123331")
 pl_sel <- get_metabolite(pl = rep1, mz = 449.1068, rt = 5.98)
 print("## 449.1079/5.51") ## 3
+#features[["Cluster_56344/Cluster_123331"]] <- rownames(pl_sel[3, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_56345/Cluster_123332")
 pl_sel <- get_metabolite(pl = rep1, mz = 449.1079, rt = 6.19)
 print("## 449.1079/6.19")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep1) ## greater, less
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39933 (Cluster_56345) 677.1342/6.05, p: 0.82")
-print("## feature in negative mode: Cluster_42266 (Cluster_56345) 449.1068/6.05, p: 0.74")
-print("## feature in negative mode: Cluster_081769 (Cluster_123332) 645.1229/6.11, p: 0.70")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-#print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_56345/Cluster_123332"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_57375/Cluster_037036")
 pl_sel <- get_metabolite(pl = rep1, mz = 463.1236, rt = 6.79)
 print("## 363.1236/6.79") ## 3
+#features[["Cluster_57375/Cluster_037036"]] <- rownames(pl_sel[3, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_57509/Cluster_126071")
 pl_sel <- get_metabolite(pl = rep1, mz = 465.1032, rt = 7.08)
 print("## 465.1032/7.08") ## 1
+#features[["Cluster_57509/Cluster_126071"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_57936/Cluster_127083")
 pl_sel <- get_metabolite(pl = rep1, mz = 471.0901, rt = 7.73)
 print("## 471.0901/7.72")
+#features[["Cluster_57936/Cluster_127083"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_63023/Cluster_139719")
@@ -2698,138 +1971,34 @@ print("feature not found in repl. 1")
 print("## Cluster_65613/Cluster_146143")
 pl_sel <- get_metabolite(pl = rep1, mz = 595.1670, rt = 6.73)
 print("## 595.1670/6.73")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1)[col0] ## greater
-print("SALK_049338, not significant for salk")
-print("## feature in negative mode: Cluster_35169 (Cluster_65613) 593.1514/6.42, p: 0.71")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 593.1514, rt = 6.42)
-#print("neg/repl. 1, SALK_011180, 593.1516/6.73, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_021216, 593.1516/6.73, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 593.1516/6.73, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 593.1516/6.73, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 593.1514, rt = 6.42)
-#print("neg/repl. 2, SALK_011180, 593.1519/6.66, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 593.1519/6.66, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 593.1519/6.66, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 593.1519/6.66, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_65613/Cluster_146143"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_66352/Cluster_148405")
 pl_sel <- get_metabolite(pl = rep1, mz = 611.1589, rt = 6.19)
 print("## 611.1617/6.19")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for col0 and salk")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep1) ## greater, less
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep1) ## greater
-print("no corresponding feature in rep1_neg")
-print("## feature in negative mode: Cluster_081769 (Cluster_148405) 645.1229/6.11, p: 0.71")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 645.1229, rt = 6.11)
-#print("neg/repl. 1, SALK_011180, 645.1229/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 645.1229/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 645.1229/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 645.1229/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 645.1229, rt = 6.11)
-#print("neg/repl. 2, SALK_011180, 645.1233/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 645.1233/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 645.1233/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 645.1233/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_66352/Cluster_148405"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_66607/Cluster_149177")
 pl_sel <- get_metabolite(pl = rep1, mz = 617.1478, rt = 6.73)
 print("## 617.1478/6.73")
-perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0] ## greater
-print("SALK_011180, not significant for salk")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1) ## greater, less
-print("SALK)921216, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1)[col0] ## greater
-print("SALK_049338, not significant for col0 and salk")
-print("## feature in negative mode: Cluster_39122 (Cluster_66607) 661.1389/6.42, p: 0.84")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 661.1389, rt = 6.42)
-print("neg/repl. 1, SALK_011180, 661.1390/6.73, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_021216, 661.1390/6.73, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 1, SALK_049338, 661.1390/6.73, alternative: greater (col0 and salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 661.1389, rt = 6.42)
-print("neg/repl. 2, SALK_011180, 661.1393/6.66, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_021216, 661.1393/6.66, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 2, SALK_049338, 661.1393/6.66, alternative: greater (col0 and salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+features[["Cluster_66607/Cluster_149177"]] <- rownames(pl_sel[1, ])
 
-
-print("## Cluster_66962/Cluster_150185")
+print("## Cluster_67054/Cluster_150397")
 pl_sel <- get_metabolite(pl = rep1, mz = 625.1768, rt = 6.79)
 print("## 625.1786/6.78") ## 1
+#features[["Cluster_67054/Cluster_150397"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_67054/Cluster_150397")
 pl_sel <- get_metabolite(pl = rep1, mz = 627.1557, rt = 5.10)
 print("# 627.1557/5.10")
+#features[["Cluster_67054/Cluster_150397"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_67262/Cluster_151134")
 pl_sel <- get_metabolite(pl = rep1, mz = 633.1427, rt = 6.19)
 print("## 633.1427/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)[col0] ## greater, less
-print("SALK_011180, not significant for salk")
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)[salk] ## less
-print("SALK_021216, not significant for col0")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39933 (Cluster_67262) 677.1342/6.05, p: 0.80")
-print("## feature in negative mode: Cluster_43398 (Cluster_67262) 745.1224/6.05, p: 0.73")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-#print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: less (salk)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-#print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: greater (col0)")
-#perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
+features[["Cluster_67262/Cluster_151134"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_67877/Cluster_152801")
 pl_sel <- get_metabolite(pl = rep1, mz = 647.1585, rt = 6.79)
@@ -2839,34 +2008,7 @@ print("no corresponding feature in rep1_neg and rep2_neg")
 print("## Cluster_67970/Cluster_153028")
 pl_sel <- get_metabolite(pl = rep1, mz = 649.1136, rt = 6.19)
 print("## 649.1163/6.19")
-perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1) ## greater, less
-perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1) ## greater, less
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_39933 (Cluster_67970) 677.1342/6.05, p: 0.80")
-print("## feature in negative mode: Cluster_43398 (Cluster_67970) 745.1224/6.05, p: 0.77")
-print("no corresponding feature in rep2_neg")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_011180, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 1, SALK_021216, 677.1340/6.18, alternative: less (salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 1, SALK_049338, 677.1340/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[2, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 677.1342, rt = 6.05)
-print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_011180, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_011180_5", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: greater (col0)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "greater")[col0]
-print("neg/repl. 2, SALK_021216, 677.1343/6.13, alternative: less (salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_021216_4", n = n_rep_neg, alternative = "less")[salk]
-print("neg/repl. 2, SALK_049338, 677.1343/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
+features[["Cluster_67970/Cluster_153028"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_68272/Cluster_153802")
 pl_sel <- get_metabolite(pl = rep1, mz = 656.2174, rt = 6.05)
@@ -2875,23 +2017,8 @@ print("## feature not found in repl. 1")
 print("## Cluster_69853/Cluster_158605")
 pl_sel <- get_metabolite(pl = rep1, mz = 701.0564, rt = 6.19)
 print("## 701.0564/6.19")
-#perform_ttest(pl = pl_sel, line = "SALK_011180_5", n = n_rep1)
-print("SALK_011180, not significant for col0 and salk")
-#perform_ttest(pl = pl_sel, line = "SALK_021216_4", n = n_rep1)
-print("SALK_021216, not significant for col0 and salk")
-perform_ttest(pl = pl_sel, line = "SALK_049338_4", n = n_rep1) ## greater
-print("## feature in negative mode: Cluster_38140 (Cluster_69853) 645.1232/6.05, p: 0.88")
-print("## feature in negative mode: Cluster_43398 (Cluster_69853) 745.1224/6.05, p: 0.84")
-print("## feature in negative mode: Cluster_081769 (Cluster_158605) 645.1229/6.11, p: 0.90")
-print("## feature in negative mode: Cluster_077251 (Cluster_158605) 609.1466/6.11, p: 0.76")
-pl_sel <- get_metabolite(pl = rep1_neg, mz = 645.1232, rt = 6.11)
-print("neg/repl. 1, SALK_049338, 645.1229/6.18, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-pl_sel <- get_metabolite(pl = rep2_neg, mz = 645.1232, rt = 6.11)
-print("neg/repl. 2, SALK_049338, 645.1229/6.13, alternative: greater (col0 and salk)")
-perform_ttest(pl = pl_sel[1, ], line = "SALK_049338_4", n = n_rep_neg, alternative = "greater")
-
-
+#features[["Cluster_69853/Cluster_158605"]] <- rownames(pl_sel[1, ])
+print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_70251/Cluster_159652")
 pl_sel <- get_metabolite(pl = rep1, mz = 712.1015, rt = 6.05)
@@ -2900,4 +2027,26 @@ print("## feature not found in repl. 1")
 print("## Cluster_779.0616/Cluster_165448")
 pl_sel <- get_metabolite(pl = rep1, mz = 779.0616, rt = 6.05)
 print("## feature not found in repl. 1")
+
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_011180_5")
+print("Col0/SALK_011180_5")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_011180_5")
+rmarkdown::paged_table(tt[["salk"]])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_021216_4")
+print("Col0/SALK_021216_4")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_021216_4")
+rmarkdown::paged_table(tt[["salk"]])
+
+tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
+    rep2_neg = rep2_neg, line = "SALK_049338_4")
+print("Col0/SALK_049338_4")
+rmarkdown::paged_table(tt[["col0"]])
+print("SALK/SALK_049338_4")
+rmarkdown::paged_table(tt[["salk"]])
 ```
