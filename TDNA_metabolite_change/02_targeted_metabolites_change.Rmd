@@ -87,11 +87,9 @@ rows_rem <- apply(a, 1, function(x) sum(is.na(x))) > 120
 rD <- rep1[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
 a <- a[!rows_rem, ]
 rD <- rD[!rows_rem, ]
-cD <- data.frame(name = colnames(rep1)[cols], 
-    genotype = colnames(rep1[, cols]),
-    injection_number = weights_rep1$injection_vial[order(
-        weights_rep1$genotype[weights_rep1$genotype %in% colnames(rep1[, cols])])])
-cD$genotype <- unlist(lapply(strsplit(cD$genotype, split = "_"), function(x)
+cD <- data.frame(name = colnames(rep1)[cols])
+cD <- dplyr::left_join(cD, weights_rep1, by = c("name" = "genotype"))
+cD$genotype <- unlist(lapply(strsplit(cD$name, split = "_"), function(x)
     paste(x[1], x[2], sep = "_")))
 cD$batch <- ifelse(cD$injection_number < 60, "1", "2")
 se_rep1 <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
@@ -111,13 +109,10 @@ rD <- rep2[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
 a <- a[!rows_rem, ]
 rD <- rD[!rows_rem, ]
 cD <- data.frame(name = colnames(rep2)[cols])
-cD <- data.frame(name = colnames(rep2)[cols], 
-    genotype = colnames(rep2[, cols]),
-    injection_number = weights_rep2$number_vial[order( ######################
-        weights_rep2$genotype[weights_rep2$genotype %in% colnames(rep2[, cols])])])
-cD$genotype <- unlist(lapply(strsplit(cD$genotype, split = "_"), function(x)
+cD <- dplyr::left_join(cD, weights_rep2, by = c("name" = "genotype"))
+cD$genotype <- unlist(lapply(strsplit(cD$name, split = "_"), function(x)
     paste(x[1], x[2], sep = "_")))
-cD$batch <- ifelse(cD$injection_number < 66, "1", "2")
+cD$batch <- ifelse(cD$number_vial < 66, "1", "2")
 se_rep2 <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
 rownames(se_rep2) <- paste("feature", seq_len(nrow(se_rep2)), sep = "_")
 ```
@@ -129,16 +124,13 @@ MatrixQCvis::shinyQC(se_rep2)
 Remove outliers
 ```{r outlier_neg}
 ## rep1
-outlier <- c("C24_1", "C24_2", "C24_3", "C24_4", 
-    "SALK_008908_3_14", "SALK_020876_4_4")
+outlier <- c("SALK_008908_3_14", "SALK_020876_4_4")
 se_rep1 <- MatrixQCvis:::selectSampleSE(se_rep1, selection = outlier, 
     mode = "exclude")
 weights_rep1 <- weights_rep1[!weights_rep1$genotype %in% outlier, ]
 
 ## rep2 
-#outlier <- c("SALK_201809C_2_3", "SALK_203919C_2_9", "SALK_081021_6_7", 
-#    "SALK_081021_6_6", "SALK_081021_6_5")
-outlier <- c("C24_1", "C24_2", "C24_3", "C24_4")
+outlier <- c("SALK_020876_4_4")
 se_rep2 <- MatrixQCvis:::selectSampleSE(se_rep2, selection = outlier, 
     mode = "exclude")
 weights_rep2 <- weights_rep2[!weights_rep2$genotype %in% outlier, ]
@@ -146,41 +138,34 @@ weights_rep2 <- weights_rep2[!weights_rep2$genotype %in% outlier, ]
 
 ```{r transformation_neg, warning = FALSE, message = FALSE}
 ## divide by weight
-a_n <- MatrixQCvis::normalizeAssay(a = assay(se_rep1), 
-    method = "quantile division", probs = 0.75) 
-se_rep1 <- MatrixQCvis:::updateSE(se = se_rep1, assay = a_n)
-
-a_n <- MatrixQCvis::normalizeAssay(a = assay(se_rep2), 
-    method = "quantile division", probs = 0.75) 
-se_rep2 <- MatrixQCvis:::updateSE(se = se_rep2, assay = a_n)
-
-# assay(se_rep1)[, weights_rep1$genotype] <- sweep(assay(se_rep1)[, weights_rep1$genotype], 
-#     MARGIN = 2, STATS = weights_rep1$weight, FUN = "/")
-# assay(se_rep2)[, weights_rep2$genotype] <- sweep(assay(se_rep2)[, weights_rep2$genotype], 
-#     MARGIN = 2, STATS = weights_rep2$weight, FUN = "/")
+assay(se_rep1) <- sweep(assay(se_rep1), MARGIN = 2, STATS = se_rep1$weight, 
+    FUN = "/")
+assay(se_rep2) <- sweep(assay(se_rep2), MARGIN = 2, STATS = se_rep2$weight, 
+    FUN = "/")
 
 ## batch correction
-## rep1 
-rep1 <- batchCorrectionAssay(se_rep1, 
-    method = "removeBatchEffect (limma)", batchColumn = "batch")
-rep1 <- cbind(rowData(se_rep1), rep1) |> as.data.frame()
-
-## rep2
-rep2 <- batchCorrectionAssay(se_rep2, 
-    method = "removeBatchEffect (limma)", batchColumn = "batch")
-rep2 <- cbind(rowData(se_rep2), rep2) |> as.data.frame()
+se_rep1 <- MatrixQCvis::batchCorrectionAssay(se_rep1, 
+    method = "removeBatchEffect (limma)", batchColumn = "batch") |>
+    MatrixQCvis:::updateSE(se = se_rep1)
+se_rep2 <- batchCorrectionAssay(se_rep2, 
+    method = "removeBatchEffect (limma)", batchColumn = "batch") |>
+    MatrixQCvis:::updateSE(se = se_rep2)
 
 ## take log2 values
-rep1[, weights_rep1$genotype] <- log2(rep1[, weights_rep1$genotype] + 1)
-rep2[, weights_rep2$genotype] <- log2(rep2[, weights_rep2$genotype] + 1)
+se_rep1 <- transformAssay(assay(se_rep1) + 1, method = "log2") |>
+    MatrixQCvis:::updateSE(se = se_rep1)
+se_rep2 <- transformAssay(assay(se_rep2) + 1, method = "log2") |>
+    MatrixQCvis:::updateSE(se = se_rep2)
 
 ## impute the NA values
-rep1[, colnames(se_rep1)] <- rep1[, colnames(se_rep1)] |>
-    as.matrix() |>
-    imputeAssay(method = "MinDet")
-rep2[, colnames(se_rep2)] <- rep2[, colnames(se_rep2)] |>
-    as.matrix() |>
-    imputeAssay(method = "MinDet")
+se_rep1 <- imputeAssay(a = assay(se_rep1), method = "MinDet") |>
+    MatrixQCvis:::updateSE(se = se_rep1)
+se_rep2 <- imputeAssay(a = assay(se_rep2), method = "MinDet") |>
+    MatrixQCvis:::updateSE(se = se_rep2)
+
+## create data.frame
+rep1 <- cbind(rowData(se_rep1), assay(se_rep1)) |> as.data.frame()
+rep2 <- cbind(rowData(se_rep2), assay(se_rep2)) |> as.data.frame()
 ```
 
 Combine rep1 and rep2
@@ -452,10 +437,11 @@ perform_ttest <- function(features, rep1, rep2, line) {
     ## rep2
     fit_rep2_salk <- limma::contrasts.fit(fit_rep2, contrast_rep2_salk)
     fit_rep2_salk <- limma::eBayes(fit_rep2_salk, trend = TRUE)
-    
+    ttest_rep2_salk <- limma::topTable(fit_rep2_salk, number = Inf, 
+        adjust.method = "fdr", p.value = 1)
     ### for rep2 include the information from the rep1 (one-sided t-test)
-    ttest_rep2_salk <- alternative_hypothesis(fit_rep_n = fit_rep2_salk, 
-        ttest_rep1 = ttest_rep1_salk, features = features_rep1)
+    ## ttest_rep2_salk <- alternative_hypothesis(fit_rep_n = fit_rep2_salk, 
+        ##ttest_rep1 = ttest_rep1_salk, features = features_rep1)
 
     ## reconcile the results
     cols <- c("logFC_rep1", "logFC_rep2", "adj.P.Val_rep1", "adj.P.Val_rep2", 
@@ -507,31 +493,26 @@ features <- list()
 
 print("## Cluster_30089/Cluster_061967")
 print("## 498.1257/8.23")
-pl_sel <- get_metabolite(pl = rep1, mz = 498.1259, rt = 8.23)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 498.1259, rt = 8.23)
 features[["Cluster_30089/Cluster_061967"]] <- rownames(pl_sel)
-
-print("## Cluster_32016/Cluster_067344")
-print("## 537.1982/5.02")
-pl_sel <- get_metabolite(pl = rep1, mz = 537.1982, rt = 5.02)
-features[["Cluster_32016/Cluster_067344"]] <- rownames(pl_sel)
 
 print("## Cluster_30089/Cluster_061967")
 print("## 498.1257/8.23")
-pl_sel <- get_metabolite(pl = rep1, mz = 498.1259, rt = 8.23)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 498.1259, rt = 8.23)
 features[["Cluster_30089/Cluster_061967"]] <- rownames(pl_sel)
 
 print("## Cluster_32016/Cluster_067344")
-pl_sel <- get_metabolite(pl = rep1, mz = 537.1982, rt = 5.02)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 537.1982, rt = 5.02)
 print("## 537.1982/5.02")
 print("## 537.1977/5.77")
 features[["Cluster_32016/Cluster_067344"]] <- rownames(pl_sel[1:2, ])
 
 print("## Cluster_42555/Cluster_090947")
-pl_sel <- get_metabolite(pl = rep1, mz = 728.2757, rt = 4.88) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 728.2757, rt = 4.88) ## n.f.
 print("feature not found in repl. 1")
 
 print("## Cluster_42557/Cluster_090947")
-pl_sel <- get_metabolite(pl = rep1, mz = 728.2774, rt = 5.04) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 728.2774, rt = 5.04) ## n.f.
 print("feature not found in repl. 1")
 
 tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, line = "SALK_037430_4")
@@ -544,7 +525,7 @@ rmarkdown::paged_table(tt[["salk"]])
 
 #### SALK_072964
 ```{r, echo = FALSE}
-features_SALK_072964 <- list()
+features <- list()
 
 print("## Cluster_26137/Cluster_050014")
 pl_sel <- get_metabolite(pl = rep1, mz = 413.1093, rt = 3.57) ## n.f.
@@ -552,98 +533,102 @@ print("feature not found in repl. 1")
 
 
 print("## Cluster_26908/Cluster_052602")
-pl_sel <- get_metabolite(pl = rep1, mz = 431.1191, rt = 3.57)
-pl_sel <- get_metabolite(pl = rep2, mz = 431.1191, rt = 3.57) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 431.1191, rt = 3.57)
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 431.1191, rt = 3.57) ## n.f.
 print("feature not found in repl. 2")
 
 print("## Cluster_26909/Cluster_052602")
-pl_sel <- get_metabolite(pl = rep1, mz = 431.1194, rt = 3.69)
-pl_sel <- get_metabolite(pl = rep2, mz = 431.1194, rt = 3.69)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 431.1194, rt = 3.69)
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 431.1194, rt = 3.69)
 print("feature not found in repl. 2")
 
 print("## Cluster_28240/Cluster_056944")
-pl_sel <- get_metabolite(pl = rep1, mz = 461.1303, rt = 3.85)
-pl_sel <- get_metabolite(pl = rep2, mz = 461.1303, rt = 3.85)
-print("feature not found in repl. 2")
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 461.1303, rt = 3.85)
+print("461.1338/3.43")
+#pl_sel <- get_metabolite(pl = rep2_cor, mz = 461.1303, rt = 3.85)
+features[["Cluster_28240/Cluster_056944"]] <- rownames(pl_sel)
 
 print("## Cluster_29139/Cluster_059193")
-pl_sel <- get_metabolite(pl = rep1, mz = 477.1249, rt = 3.69)
-print("477.1186/4.65")
-print("477.1251/2.95")
-features_SALK_072964[["Cluster_29139/Cluster_059193"]] <- rownames(pl_sel[1:2, ])
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 477.1249, rt = 3.69)
+print("feature not found in repl. 1")
+# print("477.1186/4.65")
+# print("477.1251/2.95")
+# features[["Cluster_29139/Cluster_059193"]] <- rownames(pl_sel[1:2, ])
 
 print("## Cluster_30139/Cluster_062059")
-pl_sel <- get_metabolite(pl = rep1, mz = 499.1073, rt = 3.69) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 499.1073, rt = 3.69) ## n.f.
 print("feature not found in repl. 1")
 
 print("## Cluster_31590/Cluster_066227")
-pl_sel <- get_metabolite(pl = rep1, mz = 529.1178, rt = 3.85)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 529.1178, rt = 3.85)
 print("529.1177/3.92")
 print("## 529.1178/3.69")
-features_SALK_072964[["Cluster_31590/Cluster_066227"]] <- rownames(pl_sel[1:2, ])
+features[["Cluster_31590/Cluster_066227"]] <- rownames(pl_sel[1:2, ])
 
 
 print("## Cluster_31874/Cluster_067055")
-pl_sel <- get_metabolite(pl = rep1, mz = 535.1463, rt = 7.12)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 535.1463, rt = 7.12)
 print("535.1462/7.82")
 print("535.1461/8.03")
-features_SALK_072964[["Cluster_31874/Cluster_067055"]] <- rownames(pl_sel[1:2, ])
+features[["Cluster_31874/Cluster_067055"]] <- rownames(pl_sel[1:2, ])
 
 
 print("## Cluster_31923/Cluster_067181")
-pl_sel <- get_metabolite(pl = rep1, mz = 536.1410, rt = 5.01) 
-pl_sel <- get_metabolite(pl = rep2, mz = 536.1410, rt = 5.01) ## n.f.
-print("feature not found in repl. 2")
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 536.1410, rt = 5.01) 
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 536.1410, rt = 5.01) ## n.f.
+print("feature not found in repl. 1 and repl. 2")
 
 print("## Cluster_32713/Cluster_069229")
-pl_sel <- get_metabolite(pl = rep1, mz = 551.1416, rt = 5.90)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 551.1416, rt = 5.90)
 print("551.1413/5.94")
-features_SALK_072964[["Cluster_32713/Cluster_069229"]] <- rownames(pl_sel[1, ])
+features[["Cluster_32713/Cluster_069229"]] <- rownames(pl_sel[1, ])
 
 
 print("## Cluster_33259/Cluster_070830")
-pl_sel <- get_metabolite(pl = rep1, mz = 561.0771, rt = 3.69) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 561.0771, rt = 3.69) ## n.f.
 print("feature not found in repl. 1")
-pl_sel <- get_metabolite(pl = rep2, mz = 561.0771, rt = 3.69) ## n.f.
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 561.0771, rt = 3.69) ## n.f.
 
 print("## Cluster_35713/Cluster_076522")
-pl_sel <- get_metabolite(pl = rep1, mz = 603.2200, rt = 6.21)
-pl_sel <- get_metabolite(pl = rep2, mz = 603.2200, rt = 6.21) ## n.f.
-print("feature not found in repl. 2")
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 603.2200, rt = 6.21)
+print("603.2203/6.08")
+features[["Cluster_35713/Cluster_076522"]] <- rownames(pl_sel)
 
 print("## Cluster_36010/Cluster_077152")
-pl_sel <- get_metabolite(pl = rep1, mz = 608.2201, rt = 2.99)
-pl_sel <- get_metabolite(pl = rep2, mz = 608.2201, rt = 2.99) ## n.f.
-print("feature not found in repl. 2")
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 608.2201, rt = 2.99)
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 608.2201, rt = 2.99) ## n.f.
+print("feature not found in repl. 1 and 2")
+##features[["Cluster_36010/Cluster_077152"]] <- rownames(pl_sel)
+
 
 print("## Cluster_39441/Cluster_084545")
-pl_sel <- get_metabolite(pl = rep1, mz = 667.1883, rt = 6.86)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 667.1883, rt = 6.86)
 print("## 667.1884/7.24")
 print("## 667.1889/7.02")
-features_SALK_072964[["Cluster_39441/Cluster_084545"]] <- rownames(pl_sel[1:2, ])
+features[["Cluster_39441/Cluster_084545"]] <- rownames(pl_sel[1:2, ])
 
 print("## Cluster_42608/Cluster_091037")
-pl_sel <- get_metabolite(pl = rep1, mz = 729.1679, rt = 7.78)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 729.1679, rt = 7.78)
 print("729.1683/7.80")
-print("## 729.1680/7.50")
-features_SALK_072964[["Cluster_42608/Cluster_091037"]] <- rownames(pl_sel[1:2, ])
+##print("## 729.1680/7.50")
+features[["Cluster_42608/Cluster_091037"]] <- rownames(pl_sel[1, ])
 
 
 print("## Cluster_44863/Cluster_095588")
-pl_sel <- get_metabolite(pl = rep1, mz = 777.2247, rt = 6.38)
-pl_sel <- get_metabolite(pl = rep2, mz = 777.2247, rt = 6.38) ## n.f.
-print("feature not found in repl. 2")
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 777.2247, rt = 6.38)
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 777.2247, rt = 6.38) ## n.f.
+print("feature not found in repl. 1 and 2")
 
 print("## Cluster_45928/Cluster_097741")
-pl_sel <- get_metabolite(pl = rep1, mz = 803.2406, rt = 7.12) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 803.2406, rt = 7.12) ## n.f.
 print("feature not found in repl. 1")
 
 print("## Cluster_47541/Cluster_100876")
-pl_sel <- get_metabolite(pl = rep1, mz = 845.2356, rt = 4.98)
-pl_sel <- get_metabolite(pl = rep2, mz = 845.2356, rt = 4.98) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 845.2356, rt = 4.98)
+pl_sel <- get_metabolite(pl = rep2_cor, mz = 845.2356, rt = 4.98) ## n.f.
 print("feature not found in repl. 2")
 
-tt <- perform_ttest(features_SALK_072964, rep1_cor, rep2_cor, line = "SALK_072964_5")
+tt <- perform_ttest(features, rep1_cor, rep2_cor, line = "SALK_072964_5")
 print("Col0")
 rmarkdown::paged_table(tt[["col0"]])
 print("SALK")
@@ -656,29 +641,29 @@ rmarkdown::paged_table(tt[["salk"]])
 features <- list()
 
 print("## Cluster_26220/Cluster_050308")
-pl_sel <- get_metabolite(pl = rep1, mz = 415.1264, rt = 8.16)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 415.1264, rt = 8.16)
 print("## 415.1263/8.21")
 features[["Cluster_26220/Cluster_050308"]] <- rownames(pl_sel)
 
 print("## Cluster_29119/Cluster_059172")
-pl_sel <- get_metabolite(pl = rep1, mz = 477.0638, rt = 6.33)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 477.0638, rt = 6.33)
 print("## 477.0645/6.38")
 features[["Cluster_29119/Cluster_059172"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_35940/Cluster_076981")
-pl_sel <- get_metabolite(pl = rep1, mz = 607.0222, rt = 6.33) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 607.0222, rt = 6.33) ## n.f.
 print("feature not found in repl. 1")
 #pl_sel <- get_metabolite(pl = rep2, mz = 607.0222, rt = 6.33) ## n.f.
 
 
 print("## Cluster_36285/Cluster_077756")
-pl_sel <- get_metabolite(pl = rep1, mz = 613.0401, rt = 6.33)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 613.0401, rt = 6.33)
 print("## 613.0398/6.39")
 #features[["Cluster_36285/Cluster_077756"]] <- rownames(pl_sel[1, ])
 print("feature not found in repl. 1")
 
 print("## Cluster_36917/Cluster_079278")
-pl_sel <- get_metabolite(pl = rep1, mz = 625.1013, rt = 4.17) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 625.1013, rt = 4.17) ## n.f.
 print("feature not found in repl. 1")
 
 tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
@@ -695,17 +680,18 @@ rmarkdown::paged_table(tt[["salk"]])
 
 
 ```{r salk_011180_021216_049338, echo = FALSE}
-features_SALK <- list()
+features <- list()
 
 print("## Cluster_27573/Cluster_054996")
-pl_sel <- get_metabolite(pl = rep1, mz = 477.0939, rt = 7.42)
-print("## 477.0872/8.19")
-features_SALK[["Cluster_27573/Cluster_054996"]] <- rownames(pl_sel)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 477.0939, rt = 7.42)
+print("no feature in repl. 1")
+#print("## 477.0872/8.19")
+#features[["Cluster_27573/Cluster_054996"]] <- rownames(pl_sel)
 
 print("## Cluster_28337/Cluster_057215")
-pl_sel <- get_metabolite(pl = rep1, mz = 463.0882, rt = 6.94)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 463.0882, rt = 6.94)
 print("## 463.0885/7.08")
-features_SALK[["Cluster_28337/Cluster_057215"]] <- rownames(pl_sel[1:2, ])
+features[["Cluster_28337/Cluster_057215"]] <- rownames(pl_sel[1:2, ])
 # 
 # pl_sel <- get_metabolite(pl = rep1, mz = 463.0882, rt = 6.94)
 # df <- data.frame(values = as.numeric(pl_sel[1, 6:132]), genotype = colnames(pl_sel)[6:132])
@@ -717,18 +703,15 @@ features_SALK[["Cluster_28337/Cluster_057215"]] <- rownames(pl_sel[1:2, ])
 # df$genotype <- unlist(lapply(strsplit(df$genotype, split = "_"), function(x) paste(x[1], x[2], sep = "_")))
 # ggplot2::ggplot(df, aes(x = genotype, y = values)) + geom_point() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 
-
-
-
 print("## Cluster_31680/Cluster_066469")
-pl_sel <- get_metabolite(pl = rep1, mz = 531.0760, rt = 6.95)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 531.0760, rt = 6.95)
 print("531.0761/7.07")
-features_SALK[["Cluster_31680/Cluster_066469"]] <- rownames(pl_sel[1, ])
+features[["Cluster_31680/Cluster_066469"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_35169/Cluster_075199")
-pl_sel <- get_metabolite(pl = rep1, mz = 593.1515, rt = 6.43)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 593.1515, rt = 6.43)
 print("## 593.1516/6.73")
-features_SALK[["Cluster_35169/Cluster_075199"]] <- rownames(pl_sel[1:2, ])
+features[["Cluster_35169/Cluster_075199"]] <- rownames(pl_sel[1, ])
 
 # pl_sel <- get_metabolite(pl = rep1, mz = 593.1515, rt = 6.43)
 # df <- data.frame(values = as.numeric(pl_sel[2, 6:128]), genotype = colnames(pl_sel)[6:128])
@@ -742,116 +725,116 @@ features_SALK[["Cluster_35169/Cluster_075199"]] <- rownames(pl_sel[1:2, ])
 
 
 print("## Cluster_36050/Cluster_077251")
-pl_sel <- get_metabolite(pl = rep1, mz = 609.1464, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 609.1464, rt = 6.05)
 print("## 609.1466/6.20")
-features_SALK[["Cluster_36050/Cluster_077251"]] <- rownames(pl_sel[1, ])
+features[["Cluster_36050/Cluster_077251"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_36813/Cluster_079019")
-pl_sel <- get_metabolite(pl = rep1, mz = 623.1617, rt = 6.65)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 623.1617, rt = 6.65)
 print("## 623.1625/6.79")
-print("## 623.1621/7.24")
+#print("## 623.1621/7.24")
 print("## 623.1619/6.15")
-features_SALK[["Cluster_36813/Cluster_079019"]] <- rownames(pl_sel[1:3, ])
+features[["Cluster_36813/Cluster_079019"]] <- rownames(pl_sel[c(1, 3), ])
 
 print("## Cluster_36921/Cluster_079272")
-pl_sel <- get_metabolite(pl = rep1, mz = 625.1408, rt = 6.27)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 625.1408, rt = 6.27)
 print("## 625.1416/6.12")
-features_SALK[["Cluster_36921/Cluster_079272"]] <- rownames(pl_sel)
+features[["Cluster_36921/Cluster_079272"]] <- rownames(pl_sel)
 
 print("## Cluster_38140/Cluster_081769")
-pl_sel <- get_metabolite(pl = rep1, mz = 645.1232, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 645.1232, rt = 6.05)
 print("## 645.1229/6.20")
-features_SALK[["Cluster_38140/Cluster_081769"]] <- rownames(pl_sel[1, ])
+features[["Cluster_38140/Cluster_081769"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_38744/Cluster_083055")
-pl_sel <- get_metabolite(pl = rep1, mz = 655.1520, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 655.1520, rt = 6.05)
 print("## 655.1519/6.20")
-features_SALK[["Cluster_38744/Cluster_083055"]] <- rownames(pl_sel[1, ])
+features[["Cluster_38744/Cluster_083055"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_39122/Cluster_083810")
-pl_sel <- get_metabolite(pl = rep1, mz = 661.1390, rt = 6.43)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 661.1390, rt = 6.43)
 print("## 661.1390/6.73")
-features_SALK[["Cluster_39122/Cluster_083810"]] <- rownames(pl_sel)
+features[["Cluster_39122/Cluster_083810"]] <- rownames(pl_sel)
 
 print("## Cluster_39933/Cluster_085577")
-pl_sel <- get_metabolite(pl = rep1, mz = 677.1342, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 677.1342, rt = 6.05)
 print("## 677.1340/6.19")
-features_SALK[["Cluster_39933/Cluster_085577"]] <- rownames(pl_sel[2, ])
+features[["Cluster_39933/Cluster_085577"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_41440/Cluster_088739")
-pl_sel <- get_metabolite(pl = rep1, mz = 707.1211, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 707.1211, rt = 6.05)
 print("## 707.1236/6.19")
-features_SALK[["Cluster_41440/Cluster_088839"]] <- rownames(pl_sel[2, ])
+features[["Cluster_41440/Cluster_088839"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_41494/Cluster_088839")
-pl_sel <- get_metabolite(pl = rep1, mz = 708.0628, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 708.0628, rt = 6.05)
 print("708.0637/6.20")
-features_SALK[["Cluster_41494/Cluster_088839"]] <- rownames(pl_sel)
+features[["Cluster_41494/Cluster_088839"]] <- rownames(pl_sel)
 
 print("## Cluster_42266/Cluster_090361")
-pl_sel <- get_metabolite(pl = rep1, mz = 723.1390, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 723.1390, rt = 6.05)
 print("## 723.1398/6.19")
-features_SALK[["Cluster_42266/Cluster_090361"]] <- rownames(pl_sel[1, ])
+features[["Cluster_42266/Cluster_090361"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_43042/Cluster_091992")
-pl_sel <- get_metabolite(pl = rep1, mz = 739.1040, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 739.1040, rt = 6.05)
 print("## 739.1060/6.19")
-features_SALK[["Cluster_43042/Cluster_091992"]] <- rownames(pl_sel)
+features[["Cluster_43042/Cluster_091992"]] <- rownames(pl_sel)
 
 print("## Cluster_43398/Cluster_092629")
-pl_sel <- get_metabolite(pl = rep1, mz = 745.1224, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 745.1224, rt = 6.05)
 print("745.1216/6.20")
-features_SALK[["Cluster_43398/Cluster_092629"]] <- rownames(pl_sel)
+features[["Cluster_43398/Cluster_092629"]] <- rownames(pl_sel)
 
 print("## Cluster_44151/Cluster_010308")
-pl_sel <- get_metabolite(pl = rep1, mz = 761.0875, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 761.0875, rt = 6.05)
 print("761.0928/6.19")
-features_SALK[["Cluster_44151/Cluster_010308"]] <- rownames(pl_sel)
+features[["Cluster_44151/Cluster_010308"]] <- rownames(pl_sel)
 
 print("## Cluster_46078/Cluster_098040")
-pl_sel <- get_metabolite(pl = rep1, mz = 807.0911, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 807.0911, rt = 6.05)
 print("807.0925/6.19")
-features_SALK[["Cluster_46078/Cluster_098040"]] <- rownames(pl_sel)
+features[["Cluster_46078/Cluster_098040"]] <- rownames(pl_sel)
 
 print("## Cluster_46322/Cluster_098526")
-pl_sel <- get_metabolite(pl = rep1, mz = 813.1080, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 813.1080, rt = 6.05)
 print("## 813.1088/6.19")
-features_SALK[["Cluster_46322/Cluster_098526"]] <- rownames(pl_sel)
+features[["Cluster_46322/Cluster_098526"]] <- rownames(pl_sel)
 
 print("## Cluster_46959/Cluster_011972")
-pl_sel <- get_metabolite(pl = rep1, mz = 829.0748, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 829.0748, rt = 6.05)
 print("## 829.0803/6.19")
-features_SALK[["Cluster_46959/Cluster_011972"]] <- rownames(pl_sel)
+features[["Cluster_46959/Cluster_011972"]] <- rownames(pl_sel)
 
 print("## Cluster_48505/Cluster_102833")
-pl_sel <- get_metabolite(pl = rep1, mz = 875.0775, rt = 6.05) ## n.f.
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 875.0775, rt = 6.05) ## n.f.
 print("feature not found in repl. 1")
 
 print("## Cluster_51012/Cluster_107244")
-pl_sel <- get_metabolite(pl = rep1, mz = 958.0279, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 958.0279, rt = 6.05)
 print("## 958.0318/6.19")
-features_SALK[["Cluster_51012/Cluster_107244"]] <- rownames(pl_sel)
+features[["Cluster_51012/Cluster_107244"]] <- rownames(pl_sel)
 
 print("## Cluster_56819/Cluster_114131")
-pl_sel <- get_metabolite(pl = rep1, mz = 1219.2990, rt = 6.05)
+pl_sel <- get_metabolite(pl = rep1_cor, mz = 1219.2990, rt = 6.05)
 print("1219.3000/6.20")
-features_SALK[["Cluster_56819/Cluster_114131"]] <- rownames(pl_sel)
+features[["Cluster_56819/Cluster_114131"]] <- rownames(pl_sel)
 
-tt <- perform_ttest(features = features_SALK, rep1 = rep1_cor, rep2 = rep2_cor, 
+tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
     line = "SALK_011180_5")
 print("Col0/SALK_011180_5")
 rmarkdown::paged_table(tt[["col0"]])
 print("SALK/SALK_011180_5")
 rmarkdown::paged_table(tt[["salk"]])
 
-tt <- perform_ttest(features = features_SALK, rep1 = rep1_cor, rep2 = rep2_cor, 
+tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
     line = "SALK_021216_4")
 print("Col0/SALK_021216_4")
 rmarkdown::paged_table(tt[["col0"]])
 print("SALK/SALK_021216_4")
 rmarkdown::paged_table(tt[["salk"]])
 
-tt <- perform_ttest(features = features_SALK, rep1 = rep1_cor, rep2 = rep2_cor, 
+tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
     line = "SALK_049338_4")
 print("Col0/SALK_049338_4")
 rmarkdown::paged_table(tt[["col0"]])
@@ -890,7 +873,7 @@ colnames(rep1_neg) <- gsub(colnames(rep1_neg), pattern = "_neg", replacement = "
 rep1_neg[rep1_neg == 0] <- NA
 
 ## rep2_neg
-rep2_neg <- read.table("TDNA_rep2/neg/TDNA_replicate2_neg_peaklist.txt", 
+rep2_neg <- read.table("TDNA_rep2/neg/raw_number_vial/TDNA_replicate2_neg_peaklist.txt", 
     header = TRUE, sep = "\t")
 colnames(rep2_neg) <- gsub(colnames(rep2_neg), pattern = "_neg", replacement = "")
 rep2_neg[rep2_neg == 0] <- NA
@@ -899,9 +882,12 @@ rep2_neg[rep2_neg == 0] <- NA
 Check data quality with `shinyQC`.
 ```{r shinyQC_prep_rep1_pos, echo = FALSE}
 ## rep1
-cols <- which(colnames(rep1) == "C24_1"):which(colnames(rep1) == "SALK_204674C_3_5")
+cols <- which(colnames(rep1) == "Col_0_1"):which(colnames(rep1) == "SALK_204674C_3_5")
 a <- rep1[, cols] |> as.matrix()
+rows_rem <- apply(a, 1, function(x) sum(is.na(x))) > 120
 rD <- rep1[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
+a <- a[!rows_rem, ]
+rD <- rD[!rows_rem, ]
 cD <- data.frame(name = colnames(rep1)[cols])
 cD <- dplyr::left_join(cD, weights_rep1, by = c("name" = "genotype"))
 cD$batch <- ifelse(cD$injection_vial < 60, "1", "2")
@@ -916,9 +902,12 @@ MatrixQCvis::shinyQC(se_rep1)
 
 ```{r shinyQC_prep_rep1_neg, echo = FALSE}
 ## rep1_neg
-cols <- which(colnames(rep1_neg) == "C24_1"):which(colnames(rep1_neg) == "SALK_204674C_3_5")
+cols <- which(colnames(rep1_neg) == "Col_0_1"):which(colnames(rep1_neg) == "SALK_204674C_3_5")
 a <- rep1_neg[, cols] |> as.matrix()
+rows_rem <- apply(a, 1, function(x) sum(is.na(x))) > 110
 rD <- rep1_neg[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
+a <- a[!rows_rem, ]
+rD <- rD[!rows_rem, ]
 cD <- data.frame(name = colnames(rep1_neg)[cols])
 cD <- dplyr::left_join(cD, weights_rep1, by = c("name" = "genotype"))
 cD$batch <- ifelse(cD$injection_vial < 60, "1", "2")
@@ -933,12 +922,15 @@ MatrixQCvis::shinyQC(se_rep1_neg)
 
 ```{r shinyQC_prep_rep2_neg, echo = FALSE}
 ## rep2_neg
-cols <- which(colnames(rep2_neg) == "C24_1"):which(colnames(rep2_neg) == "SALK_204674C_3_5")
+cols <- which(colnames(rep2_neg) == "Col_0_1"):which(colnames(rep2_neg) == "SALK_204674C_3_5")
 a <- rep2_neg[, cols] |> as.matrix()
+rows_rem <- apply(a, 1, function(x) sum(is.na(x))) > 120
 rD <- rep2_neg[, c("mz", "rt", "npeaks", "adduct", "pcgroup")]
+a <- a[!rows_rem, ]
+rD <- rD[!rows_rem, ]
 cD <- data.frame(name = colnames(rep2_neg)[cols])
 cD <- dplyr::left_join(cD, weights_rep2, by = c("name" = "genotype"))
-cD$batch <- ifelse(cD$injection_vial < 66, "1", "2")
+cD$batch <- ifelse(cD$number_vial < 66, "1", "2")
 cD$genotype <- gsub(x = cD$name, pattern = "_[0-9][0-9]$|_[0-9]$", replacement = "")
 se_rep2_neg <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
 rownames(se_rep2_neg) <- paste("feature", seq_len(nrow(se_rep2_neg)), sep = "_")
@@ -951,7 +943,8 @@ MatrixQCvis::shinyQC(se_rep2_neg)
 Remove outliers
 ```{r outlier_pos, echo = FALSE}
 ## rep1
-outlier <- c("SALK_008908_3_14", "SALK_020876_4_4")
+outlier <- c("SALK_011180_5_3", "SALK_072964_5_4", "SALK_203337C_2_2",
+    "SALK_049338_4_3", "SALK_008908_3_14", "SALK_008908_3_12")
 se_rep1 <- MatrixQCvis:::selectSampleSE(se_rep1, selection = outlier,
     mode = "exclude")
 
@@ -961,8 +954,7 @@ se_rep1_neg <- MatrixQCvis:::selectSampleSE(se_rep1_neg, selection = outlier,
     mode = "exclude")
 
 ## rep2_neg
-outlier <- c("SALK_201809C_2_3", "SALK_203919C_2_9", "SALK_081021_6_7", 
-    "SALK_081021_6_6", "SALK_081021_6_5")
+outlier <- c("SALK_020876_4_4")
 se_rep2_neg <- MatrixQCvis:::selectSampleSE(se_rep2_neg, selection = outlier, 
     mode = "exclude")
 ```
@@ -978,38 +970,36 @@ assay(se_rep2_neg) <- sweep(assay(se_rep2_neg), MARGIN = 2,
 
 ## batch correction
 ## rep1 
-rep1 <- MatrixQCvis::batchCorrectionAssay(se_rep1, 
-    method = "removeBatchEffect (limma)", batchColumn = "batch")
-rep1 <- cbind(rowData(se_rep1), rep1) |> as.data.frame()
-
-## rep1_neg
-rep1_neg <- batchCorrectionAssay(se_rep1_neg, 
-    method = "removeBatchEffect (limma)", batchColumn = "batch")
-rep1_neg <- cbind(rowData(se_rep1_neg), rep1_neg) |> as.data.frame()
-
-## rep2_neg
-rep2_neg <- batchCorrectionAssay(se_rep2_neg, 
-    method = "removeBatchEffect (limma)", batchColumn = "batch")
-rep2_neg <- cbind(rowData(se_rep2_neg), rep2_neg) |> as.data.frame()
+se_rep1 <- MatrixQCvis::batchCorrectionAssay(se_rep1, 
+    method = "removeBatchEffect (limma)", batchColumn = "batch") |>
+    MatrixQCvis:::updateSE(se = se_rep1)
+se_rep1_neg <- batchCorrectionAssay(se_rep1_neg, 
+    method = "removeBatchEffect (limma)", batchColumn = "batch") |>
+    MatrixQCvis:::updateSE(se = se_rep1_neg)
+se_rep2_neg <- batchCorrectionAssay(se_rep2_neg, 
+    method = "removeBatchEffect (limma)", batchColumn = "batch") |>
+    MatrixQCvis:::updateSE(se = se_rep2_neg)
 
 ## take log2 values
-cols <- colnames(se_rep1)
-rep1[, cols] <- log2(rep1[, cols] + 1)
-cols <- colnames(se_rep1_neg)
-rep1_neg[, cols] <- log2(rep1_neg[, cols] + 1)
-cols <- colnames(se_rep2_neg)
-rep2_neg[, cols] <- log2(rep2_neg[, cols] + 1)
+se_rep1 <- transformAssay(assay(se_rep1) + 1, method = "log2") |>
+    MatrixQCvis:::updateSE(se = se_rep1)
+se_rep1_neg <- transformAssay(assay(se_rep1_neg) + 1, method = "log2") |>
+    MatrixQCvis:::updateSE(se = se_rep1_neg)
+se_rep2_neg <- transformAssay(assay(se_rep2_neg) + 1, method = "log2") |>
+    MatrixQCvis:::updateSE(se = se_rep2_neg)
 
 ## impute the NA values
-rep1[, colnames(se_rep1)] <- rep1[, colnames(se_rep1)] |>
-    as.matrix() |>
-    imputeAssay(method = "MinDet")
-rep1_neg[, colnames(se_rep1_neg)] <- rep1_neg[, colnames(se_rep1_neg)] |>
-    as.matrix() |>
-    imputeAssay(method = "MinDet")
-rep2_neg[, colnames(se_rep2_neg)] <- rep2_neg[, colnames(se_rep2_neg)] |>
-    as.matrix() |>
-    imputeAssay(method = "MinDet")
+se_rep1 <- imputeAssay(a = assay(se_rep1), method = "MinDet") |>
+    MatrixQCvis:::updateSE(se = se_rep1)
+se_rep1_neg <- imputeAssay(a = assay(se_rep1_neg), method = "MinDet") |>
+    MatrixQCvis:::updateSE(se = se_rep1_neg)
+se_rep2_neg <- imputeAssay(a = assay(se_rep2_neg), method = "MinDet") |>
+    MatrixQCvis:::updateSE(se = se_rep2_neg)
+
+## create data.frame
+rep1 <- cbind(rowData(se_rep1), assay(se_rep1)) |> as.data.frame()
+rep1_neg <- cbind(rowData(se_rep1_neg), assay(se_rep1_neg)) |> as.data.frame()
+rep2_neg <- cbind(rowData(se_rep2_neg), assay(se_rep2_neg)) |> as.data.frame()
 ```
 
 Combine rep1, rep1_neg and rep2_neg. 
