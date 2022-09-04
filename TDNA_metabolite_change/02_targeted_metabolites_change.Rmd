@@ -91,7 +91,7 @@ cD <- data.frame(name = colnames(rep1)[cols])
 cD <- dplyr::left_join(cD, weights_rep1, by = c("name" = "genotype"))
 cD$genotype <- unlist(lapply(strsplit(cD$name, split = "_"), function(x)
     paste(x[1], x[2], sep = "_")))
-cD$batch <- ifelse(cD$injection_number < 60, "1", "2")
+cD$batch <- ifelse(cD$injection_vial < 60, "1", "2")
 se_rep1 <- SummarizedExperiment::SummarizedExperiment(assays = a, rowData = rD, colData = cD)
 rownames(se_rep1) <- paste("feature", seq_len(nrow(se_rep1)), sep = "_")
 ```
@@ -655,7 +655,6 @@ pl_sel <- get_metabolite(pl = rep1_cor, mz = 607.0222, rt = 6.33) ## n.f.
 print("feature not found in repl. 1")
 #pl_sel <- get_metabolite(pl = rep2, mz = 607.0222, rt = 6.33) ## n.f.
 
-
 print("## Cluster_36285/Cluster_077756")
 pl_sel <- get_metabolite(pl = rep1_cor, mz = 613.0401, rt = 6.33)
 print("## 613.0398/6.39")
@@ -969,7 +968,6 @@ assay(se_rep2_neg) <- sweep(assay(se_rep2_neg), MARGIN = 2,
     STATS = se_rep2_neg$weight, FUN = "/")
 
 ## batch correction
-## rep1 
 se_rep1 <- MatrixQCvis::batchCorrectionAssay(se_rep1, 
     method = "removeBatchEffect (limma)", batchColumn = "batch") |>
     MatrixQCvis:::updateSE(se = se_rep1)
