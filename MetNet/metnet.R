@@ -8,6 +8,16 @@ peaklist_neg2 <- read.table("rep2_negative_match.csv", sep = "\t", dec = ".", st
 peaklist_pos1 <- read.table("rep1_positive_match.csv", sep = "\t", dec = ".", stringsAsFactors = FALSE, header = TRUE)
 peaklist_pos2 <- read.table("rep2_positive_match.csv", sep = "\t", dec = ".", stringsAsFactors = FALSE, header = TRUE)
 
+## rename the features
+peaklist_neg1[, "Name"] <- paste(peaklist_neg1[, "Name"], 
+    round(peaklist_neg1[, "mz"], 4), round(peaklist_neg1[, "RT"], 2), sep = "_")
+peaklist_neg2[, "Name"] <- paste(peaklist_neg2[, "Name"], 
+    round(peaklist_neg2[, "mz"], 4), round(peaklist_neg2[, "RT"], 2), sep = "_")
+peaklist_pos1[, "Name"] <- paste(peaklist_pos1[, "Name"], 
+    round(peaklist_pos1[, "mz"], 4), round(peaklist_pos1[, "RT"], 2), sep = "_")
+peaklist_pos2[, "Name"] <- paste(peaklist_pos2[, "Name"], 
+    round(peaklist_pos2[, "mz"], 4), round(peaklist_pos2[, "RT"], 2), sep = "_")
+
 ## combine data sets (preparation)
 pl_neg1 <- peaklist_neg1[, grep(colnames(peaklist_neg1), pattern = "Sample")]
 colnames(pl_neg1) <- paste(colnames(pl_neg1), "_rep1", sep = "")
@@ -23,10 +33,27 @@ cols_l <- grep(colnames(peaklist_pos2), pattern = "leaf_Sample")
 pl_pos2 <- peaklist_pos2[, cols[!cols %in% cols_l]]
 colnames(pl_pos2) <- paste(colnames(pl_pos2), "_rep2", sep = "")
 
+## set to NA where intensities are 0
+pl_neg1[pl_neg1 == 0] <- NA
+pl_neg2[pl_neg2 == 0] <- NA
+pl_pos1[pl_pos1 == 0] <- NA
+pl_pos2[pl_pos2 == 0] <- NA
+
 ## combine
 pl_neg <- cbind(mz = peaklist_neg1[, "mz"], rt = peaklist_neg1[, "RT"], pl_neg1, pl_neg2)
 pl_pos <- cbind(mz = peaklist_pos1[, "mz"], rt = peaklist_pos1[, "RT"], pl_pos1, pl_pos2)
+pl_neg <- pl_neg[!duplicated(peaklist_neg1[, "Name"]), ]
+pl_pos <- pl_pos[!duplicated(peaklist_pos1[, "Name"]), ]
+rownames(pl_neg) <- peaklist_neg1[!duplicated(peaklist_neg1[, "Name"]), "Name"]
+rownames(pl_pos) <- peaklist_pos1[!duplicated(peaklist_pos1[, "Name"]), "Name"]
 
+## log transform the intensities
+pl_neg[, -c(1:2)] <- log(pl_neg[, -c(1:2)])
+pl_pos[, -c(1:2)] <- log(pl_pos[, -c(1:2)])
+
+## filter the data.frames
+pl_neg <- pl_neg[apply(pl_neg[, -c(1:2)], 1, max, na.rm = TRUE) > 15, ]
+pl_pos <- pl_pos[apply(pl_pos[, -c(1:2)], 1, max, na.rm = TRUE) > 17, ]
 
 ## create data.frame with transformations
 transformations <- rbind(
@@ -147,10 +174,6 @@ struct_adj_neg <- structural(x = pl_neg, transformation = transformations_neg,
 struct_adj_neg <- rtCorrection(am = struct_adj_neg, x = pl_neg,
     transformation = transformations_neg, var = "group")
 
-rownames(struct_adj_neg[[1]]) <- colnames(struct_adj_neg[[1]]) <- peaklist_neg1[, "Name"]
-rownames(struct_adj_neg[[2]]) <- colnames(struct_adj_neg[[2]]) <- peaklist_neg1[, "Name"]
-rownames(struct_adj_pos[[1]]) <- colnames(struct_adj_pos[[1]]) <- peaklist_pos1[, "Name"]
-rownames(struct_adj_pos[[2]]) <- colnames(struct_adj_pos[[2]]) <- peaklist_pos1[, "Name"]
 ## save
 save(struct_adj_pos, file = "MetNet_seed_struct_adj_pos.RData")
 save(struct_adj_neg, file = "MetNet_seed_struct_adj_neg.RData")
@@ -161,21 +184,12 @@ inds_neg <- which(colnames(pl_neg) == "Sample1_Negative_rep1"):which(colnames(pl
 pl_pos_cut <- pl_pos[, inds_pos]
 pl_neg_cut <- pl_neg[, inds_neg]
 
-models <- c("pearson", "pearson_partial", "spearman", "spearman_partial")
+models <- c("pearson", "spearman")
 
 ## apply the function statistical to create weighted adjacency matrices 
 ## per model
-stat_adj_pos <- statistical(as.matrix(pl_pos_cut), model = models) 
+stat_adj_pos <- statistical(as.matrix(pl_pos_cut), model = models)
 stat_adj_neg <- statistical(as.matrix(pl_neg_cut), model = models)
-
-rownames(stat_adj_pos[[1]]) <- colnames(stat_adj_pos[[1]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_pos[[2]]) <- colnames(stat_adj_pos[[2]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_pos[[3]]) <- colnames(stat_adj_pos[[3]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_pos[[4]]) <- colnames(stat_adj_pos[[4]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_neg[[1]]) <- colnames(stat_adj_neg[[1]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_neg[[2]]) <- colnames(stat_adj_neg[[2]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_neg[[3]]) <- colnames(stat_adj_neg[[3]]) <- peaklist_neg1[, "Name"]
-rownames(stat_adj_neg[[4]]) <- colnames(stat_adj_neg[[4]]) <- peaklist_neg1[, "Name"]
 
 save(stat_adj_pos, file = "MetNet_seed_stat_adj_pos.RData")
 save(stat_adj_neg, file = "MetNet_seed_stat_adj_neg.RData")
@@ -184,94 +198,90 @@ save(stat_adj_neg, file = "MetNet_seed_stat_adj_neg.RData")
 ## type = "threshold" 
 ## define thresholds
 pdf("hist_pos_pearson.pdf")
-hist(stat_adj_pos_NA[["pearson"]])
-dev.off()
-
-pdf("hist_pos_pearson_partial.pdf")
-hist(stat_adj_pos_NA[["pearson_partial"]])
+hist(assay(stat_adj_pos, "pearson_coef"))
 dev.off()
 
 pdf("hist_pos_spearman.pdf")
-hist(stat_adj_pos_NA[["spearman"]])
-dev.off()
-
-pdf("hist_pos_spearman_partial.pdf")
-hist(stat_adj_pos_NA[["spearman_partial"]])
+hist(assay(stat_adj_pos, "spearman_coef"))
 dev.off()
 
 pdf("hist_neg_pearson.pdf")
-hist(stat_adj_neg_NA[["pearson"]])
-dev.off()
-
-pdf("hist_neg_pearson_partial.pdf")
-hist(stat_adj_neg_NA[["pearson_partial"]])
+hist(assay(stat_adj_neg, "pearson_coef"))
 dev.off()
 
 pdf("hist_neg_spearman.pdf")
-hist(stat_adj_neg_NA[["spearman"]])
-dev.off()
-
-pdf("hist_neg_spearman_partial.pdf")
-hist(stat_adj_neg_NA[["spearman_partial"]])
+hist(assay(stat_adj_neg, "spearman_coef"))
 dev.off()
 
 ## check thresholds
-table(stat_adj_neg[["pearson"]][upper.tri(stat_adj_neg[["pearson"]])] > 0.5)
-table(stat_adj_pos[["pearson"]][upper.tri(stat_adj_pos[["pearson"]])] > 0.5)
-table(stat_adj_neg[["pearson_partial"]][upper.tri(stat_adj_neg[["pearson_partial"]])] > 0.2)
-table(stat_adj_pos[["pearson_partial"]][upper.tri(stat_adj_pos[["pearson_partial"]])] > 0.2)
-table(stat_adj_neg[["spearman"]][upper.tri(stat_adj_neg[["spearman"]])] > 0.5)
-table(stat_adj_pos[["spearman"]][upper.tri(stat_adj_pos[["spearman"]])] > 0.5)
-table(stat_adj_neg[["spearman_partial"]][upper.tri(stat_adj_neg[["spearman_partial"]])] > 0.2)
-table(stat_adj_pos[["spearman_partial"]][upper.tri(stat_adj_pos[["spearman_partial"]])] > 0.2)
+table(assay(stat_adj_neg, "pearson_coef")[upper.tri(assay(stat_adj_neg, "pearson_coef"))] > 0.5)
+table(assay(stat_adj_pos, "pearson_coef")[upper.tri(assay(stat_adj_pos, "pearson_coef"))] > 0.5)
+table(assay(stat_adj_neg, "spearman_coef")[upper.tri(assay(stat_adj_neg, "spearman_coef"))] > 0.5)
+table(assay(stat_adj_pos, "spearman)coef")[upper.tri(assay(stat_adj_pos, "spearman_coef"))] > 0.5)
 
-args <- list("pearson" = 0.5, "pearson_partial" = 0.2, "spearman" = 0.5,
-             "spearman_partial" = 0.2, threshold = 1)
-stat_adj_pos_thr <- threshold(statistical = stat_adj_pos, type = "threshold",
-                              args = args)
-stat_adj_neg_thr <- threshold(statistical = stat_adj_neg, type = "threshold",
-                              args = args)
+
+args <- list(
+    filter = "pearson_coef > 0.7 & spearman_coef > 0.5 & pearson_pvalue < 0.05 & spearman_pvalue < 0.05")
+stat_adj_pos_thr <- threshold(am = stat_adj_pos, type = "threshold", 
+    args = args)
+stat_adj_neg_thr <- threshold(am = stat_adj_neg, type = "threshold", 
+    args = args)
 
 ## type = "top2"
-args_top <- list(n = 250000)
-stat_adj_pos_top2 <- threshold(statistical = stat_adj_pos, type = "top2",
+args_top <- list(n = 10000)
+stat_adj_pos_top2 <- threshold(am = stat_adj_pos, type = "top2",
                                args = args_top)
-stat_adj_neg_top2 <- threshold(statistical = stat_adj_neg, type = "top2",
+stat_adj_neg_top2 <- threshold(am = stat_adj_neg, type = "top2",
                                args = args_top)
 
 save(stat_adj_pos_thr, stat_adj_pos_top2, file = "MetNet_seed_stat_adj_thr_pos.RData")
 save(stat_adj_neg_thr, stat_adj_neg_top2, file = "MetNet_seed_stat_adj_thr_neg.RData")
 
 ## use function combine to combine the structural and statistical information
-cons_adj_pos <- combine(structural = struct_adj_pos, 
-                        statistical = stat_adj_pos_thr)
-cons_adj_neg <- combine(structural = struct_adj_neg, 
-                        statistical = stat_adj_neg_thr)
+cons_adj_pos <- combine(am_structural = struct_adj_pos, 
+                        am_statistical = stat_adj_pos_thr)
+cons_adj_neg <- combine(am_structural = struct_adj_neg, 
+                        am_statistical = stat_adj_neg_thr)
 
-save(cons_adj_pos, file = "MetNet_strawberry_cons_adj_pos.RData")
-save(cons_adj_neg, file = "MetNet_strawberry_cons_adj_neg.RData")
-
-## rename edges, Cluster name from rep1
-rownames(cons_adj_pos[[1]]) <- colnames(cons_adj_pos[[1]]) <- paste(peaklist_pos1[, "Name"], round(peaklist_pos1[, "mz"], 4), round(peaklist_pos1[, "RT"], 2), sep = "_") 
-rownames(cons_adj_pos[[2]]) <- colnames(cons_adj_pos[[2]]) <- paste(peaklist_pos1[, "Name"], round(peaklist_pos1[, "mz"], 4), round(peaklist_pos1[, "RT"], 2), sep = "_")
-rownames(cons_adj_neg[[1]]) <- colnames(cons_adj_neg[[1]]) <- paste(peaklist_neg1[, "Name"], round(peaklist_neg1[, "mz"], 4), round(peaklist_neg1[, "RT"], 2), sep = "_")
-rownames(cons_adj_neg[[2]]) <- colnames(cons_adj_neg[[2]]) <- paste(peaklist_neg1[, "Name"], round(peaklist_neg1[, "mz"], 4), round(peaklist_neg1[, "RT"], 2), sep = "_")
+save(cons_adj_pos, file = "MetNet_seed_cons_adj_pos.RData")
+save(cons_adj_neg, file = "MetNet_seed_cons_adj_neg.RData")
 
 ## remove adducts
 cons_adj_pos_rem <- cons_adj_pos
 cons_adj_neg_rem <- cons_adj_neg
-rown <- rownames(cons_adj_pos[[1]])
-rt <- as.numeric(unlist(lapply(strsplit(rown, split = "_"), "[", 4)))
-for (i in 1:nrow(cons_adj_pos_rem[[1]])) {
-  cons_adj_pos_rem[[1]][abs(rt[i] - rt) > 0.1 & grepl(cons_adj_pos_rem[[1]][, i], pattern = "adduct_"), ] <- 0
-  cons_adj_pos_rem[[2]][abs(rt[i] - rt) > 0.1 & grepl(cons_adj_pos_rem[[2]][, i], pattern = "adduct_"), ] <- 0
+rt <- lapply(strsplit(rownames(cons_adj_pos), split = "_"), "[", 4) |>
+    unlist() |>
+    as.numeric()
+for (i in 1:ncol(cons_adj_pos_rem)) {
+    inds <- which(abs(rt[i] - rt) > 0.1 & 
+        grepl(assay(cons_adj_pos_rem, "combine_group")[, i], pattern = "adduct_"))
+    if (length(inds) > 0) {
+        assay(cons_adj_pos_rem, "combine_binary")[inds, i] <- 0
+        assay(cons_adj_pos_rem, "combine_group")[inds, i] <- 0
+        assay(cons_adj_pos_rem, "combine_mass")[inds, i] <- ""
+        assay(cons_adj_pos_rem, "combine_rt")[inds, i] <- ""
+        assay(cons_adj_pos_rem, "combine_group")[inds, i] <- ""  
+    }
+    
 }
-rown <- rownames(cons_adj_neg[[1]])
-rt <- as.numeric(unlist(lapply(strsplit(rown, split = "_"), "[", 4)))
-for (i in 1:nrow(cons_adj_neg_rem[[1]])) {
-    cons_adj_neg_rem[[1]][abs(rt - rt[i]) > 0.1 & grepl(cons_adj_neg_rem[[2]][, i], pattern = "adduct_"), ] <- 0
-    cons_adj_neg_rem[[2]][abs(rt - rt[i]) > 0.1 & grepl(cons_adj_neg_rem[[2]][, i], pattern = "adduct_"), ] <- ""
+rt <- lapply(strsplit(rownames(cons_adj_neg), split = "_"), "[", 4) |>
+    unlist() |>
+    as.numeric()
+for (i in 1:ncol(cons_adj_neg_rem)) {
+    inds <- which(abs(rt[i] - rt) > 0.1 & 
+        grepl(assay(cons_adj_neg_rem, "combine_group")[, i], pattern = "adduct_"))
+    if (length(inds) > 0) {
+        assay(cons_adj_neg_rem, "combine_binary")[inds, i] <- 0
+        assay(cons_adj_neg_rem, "combine_group")[inds, i] <- 0
+        assay(cons_adj_neg_rem, "combine_mass")[inds, i] <- ""
+        assay(cons_adj_neg_rem, "combine_rt")[inds, i] <- ""
+        assay(cons_adj_neg_rem, "combine_group")[inds, i] <- ""  
+    }
 }
+save(cons_adj_pos_rem, file = "MetNet_seed_cons_adj_pos_rem.RData")
+save(cons_adj_neg_rem, file = "MetNet_seed_cons_adj_neg_rem.RData")
+
+####################################################################################
 
 ## build network with mapped features 
 ## (feature that was mapped at least to one locus in one of the replicates)
@@ -286,25 +296,25 @@ map_neg <- map_neg[map_neg[, "locus_tag_seed1"] != "" | map_neg[, "locus_tag_see
 map_neg_met <- unique(map_neg[, "met_rep1"])
 
 ## truncate that it only contains mapped features
-cons_adj_pos_map <- cons_adj_pos_rem
-cut_rown <- unlist(lapply(lapply(strsplit(rownames(cons_adj_pos_rem[[1]]), 
+cut_rown <- unlist(lapply(lapply(strsplit(rownames(cons_adj_pos_rem), 
     split = "_"), "[", 1:2), paste, collapse = "_"))
 inds <- match(cut_rown, map_pos_met)
 inds <- !is.na(inds)
-cons_adj_pos_map[[1]] <- cons_adj_pos[[1]][inds, inds]
-cons_adj_pos_map[[2]] <- cons_adj_pos[[2]][inds, inds]
+cons_adj_pos_map <- assay(cons_adj_pos, "combine_binary")[inds, inds]
 
-cons_adj_neg_map <- cons_adj_neg_rem
-cut_rown <- unlist(lapply(lapply(strsplit(rownames(cons_adj_neg_rem[[1]]), 
+cut_rown <- unlist(lapply(lapply(strsplit(rownames(cons_adj_neg_rem), 
     split = "_"), "[", 1:2), paste, collapse = "_"))
 inds <- match(cut_rown, map_neg_met)
 inds <- !is.na(inds)
-cons_adj_neg_map[[1]] <- cons_adj_neg_rem[[1]][inds, inds]
-cons_adj_neg_map[[2]] <- cons_adj_neg_rem[[2]][inds, inds]
+cons_adj_neg_map <- assay(cons_adj_neg_rem, "combine_binary")[inds, inds]
 
-g_pos <- graph_from_adjacency_matrix(cons_adj_pos_map[[1]], mode = "directed")
-g_neg <- graph_from_adjacency_matrix(cons_adj_neg_map[[1]], mode = "directed")
+g_pos <- igraph::graph_from_adjacency_matrix(cons_adj_pos_map, 
+    mode = "directed")
+g_neg <- igraph::graph_from_adjacency_matrix(cons_adj_neg_map, 
+    mode = "directed")
 
 ## export to XML
-write_graph(g_pos, file = "cons_adj_pos_map_graphml.xml", format = "graphml")
-write_graph(g_neg, file = "cons_adj_neg_map_graphml.xml", format = "graphml")
+igraph::write_graph(g_pos, file = "cons_adj_pos_map_graphml.xml", 
+    format = "graphml")
+igraph::write_graph(g_neg, file = "cons_adj_neg_map_graphml.xml", 
+    format = "graphml")
