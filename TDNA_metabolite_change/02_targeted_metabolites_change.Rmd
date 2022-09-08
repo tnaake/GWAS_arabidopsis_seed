@@ -424,8 +424,9 @@ perform_ttest <- function(features, rep1, rep2, line) {
     fit_rep2_col0 <- limma::eBayes(fit_rep2_col0, trend = TRUE)
     
     ### for rep2 include the information from the rep1 (one-sided t-test)
-    ttest_rep2_col0 <- alternative_hypothesis(fit_rep_n = fit_rep2_col0, 
-        ttest_rep1 = ttest_rep1_col0, features = features_rep1)
+    ttest_rep2_col0 <- limma::topTable(fit_rep2_col0, number = Inf, 
+        adjust.method = "fdr", p.value = 1)##alternative_hypothesis(fit_rep_n = fit_rep2_col0, 
+        ##ttest_rep1 = ttest_rep1_col0, features = features_rep1)
     
     ## for salk
     ## rep1
@@ -444,21 +445,23 @@ perform_ttest <- function(features, rep1, rep2, line) {
         ##ttest_rep1 = ttest_rep1_salk, features = features_rep1)
 
     ## reconcile the results
-    cols <- c("logFC_rep1", "logFC_rep2", "adj.P.Val_rep1", "adj.P.Val_rep2", 
+    cols <- c("rep2", "logFC_rep1", "logFC_rep2", "adj.P.Val_rep1", "adj.P.Val_rep2", 
         "P.Value_rep1", "P.Value_rep2", "AveExpr_rep1", "AveExpr_rep2",
         "t_rep1", "t_rep2", "B_rep1", "B_rep2")
     
     ## col0
     colnames(ttest_rep1_col0) <- paste0(colnames(ttest_rep1_col0), "_rep1")
     colnames(ttest_rep2_col0) <- paste0(colnames(ttest_rep2_col0), "_rep2")
-    ttest_col0 <- cbind(ttest_rep1_col0[features_rep1, ], 
+    ttest_col0 <- cbind(rep2 = rownames(ttest_rep2_col0[features_rep2, ]),
+        ttest_rep1_col0[features_rep1, ], 
         ttest_rep2_col0[features_rep2, ])
     ttest_col0 <- ttest_col0[, cols]
     
     ## salk
     colnames(ttest_rep1_salk) <- paste0(colnames(ttest_rep1_salk), "_rep1")
     colnames(ttest_rep2_salk) <- paste0(colnames(ttest_rep2_salk), "_rep2")
-    ttest_salk <- cbind(ttest_rep1_salk[features_rep1, ], 
+    ttest_salk <- cbind(rep2 = rownames(ttest_rep2_salk[features_rep2, ]),
+        ttest_rep1_salk[features_rep1, ], 
         ttest_rep2_salk[features_rep2, ])
     ttest_salk <- ttest_salk[, cols]
     
@@ -478,14 +481,6 @@ salk <- c("ttest_SALK_lines", "adj_p_SALK_lines")
 
 For t-tests, `x` is `Col-0` or other SALK lines and `y` is the line.
 
-We do not have any assumptions on feature levels in the first replicate, thus
-we do set the alternative to `"two.sided"` (default).
-
-If `x` is to be expected higher  than `y` (only in the second replicate), 
-`alternative` should be set to `"greater"`. 
-
-If `y` is to be expected higher than `x` (only in the second replicate),
-`alternative` should be set to `"less"`.
 
 #### SALK_037430
 ```{r ttests_neg_SALK_037430, echo = FALSE}
@@ -516,6 +511,9 @@ pl_sel <- get_metabolite(pl = rep1_cor, mz = 728.2774, rt = 5.04) ## n.f.
 print("feature not found in repl. 1")
 
 tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, line = "SALK_037430_4")
+
+## print features
+features
 
 print("Col0")
 rmarkdown::paged_table(tt[["col0"]])
@@ -628,6 +626,10 @@ pl_sel <- get_metabolite(pl = rep1_cor, mz = 845.2356, rt = 4.98)
 pl_sel <- get_metabolite(pl = rep2_cor, mz = 845.2356, rt = 4.98) ## n.f.
 print("feature not found in repl. 2")
 
+
+## print features
+features
+
 tt <- perform_ttest(features, rep1_cor, rep2_cor, line = "SALK_072964_5")
 print("Col0")
 rmarkdown::paged_table(tt[["col0"]])
@@ -664,6 +666,10 @@ print("feature not found in repl. 1")
 print("## Cluster_36917/Cluster_079278")
 pl_sel <- get_metabolite(pl = rep1_cor, mz = 625.1013, rt = 4.17) ## n.f.
 print("feature not found in repl. 1")
+
+
+## print features
+features
 
 tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
     line = "SALK_024438_5")
@@ -819,6 +825,9 @@ pl_sel <- get_metabolite(pl = rep1_cor, mz = 1219.2990, rt = 6.05)
 print("1219.3000/6.20")
 features[["Cluster_56819/Cluster_114131"]] <- rownames(pl_sel)
 
+## print features
+features
+
 tt <- perform_ttest(features = features, rep1 = rep1_cor, rep2 = rep2_cor, 
     line = "SALK_011180_5")
 print("Col0/SALK_011180_5")
@@ -841,6 +850,165 @@ print("SALK/SALK_049338_4")
 rmarkdown::paged_table(tt[["salk"]])
 ```
 
+### Create plots
+
+```{r plots_negative}
+create_plot <- function(feature_rep1 = "feature_16163", 
+        feature_rep2 = "feature_13635", line = "SALK_072964") {
+    
+    #rep1_cor <- rep1_cor[, sort(colnames(rep1_cor))]
+    #rep2_cor <- rep2_cor[, sort(colnames(rep2_cor))]
+    
+    col0 <- c("Col_0_1", "Col_0_2", "Col_0_3", "Col_0_4", "Col_0_5", "Col_0_6",
+        "Col_0_7", "Col_0_8", "Col_0_9", "Col_0_10")
+    other_salk_lines <- c("mz", "rt", "npeaks", "adduct", "pcgroup", 
+        "mapping_rep1_rep2", "cor", "rt_dev", "mz_dev", col0, line)
+    salk_rep1 <- !grepl(colnames(rep1_cor), 
+        pattern = paste(other_salk_lines, collapse = "|"))
+    salk_rep2 <- !grepl(colnames(rep2_cor), 
+        pattern = paste(other_salk_lines, collapse = "|"))
+    rep1_cor_feat <- rep1_cor[feature_rep1, ]
+    rep2_cor_feat <- rep2_cor[feature_rep2, ]
+    
+    df <- rbind(
+        cbind(type = "Col-0", rep = "rep. 1",
+            values = as.numeric(rep1_cor_feat[, col0])),
+        cbind(type = "SALK", rep = "rep. 1", 
+            values = as.numeric(rep1_cor_feat[, salk_rep1])),
+        cbind(type = "Col-0", rep = "rep. 2", 
+            values = as.numeric(rep2_cor_feat[, col0])),
+        cbind(type = "SALK", rep = "rep. 2",
+            values = as.numeric(rep2_cor_feat[, salk_rep2]))
+    ) |>
+        data.frame()
+    
+    for (i in line) {
+        df_i <- rbind(
+            cbind(type = i, rep = "rep. 1", values = as.numeric(
+                rep1_cor_feat[, grep(colnames(rep1_cor), pattern = i)])),
+            cbind(type = i, rep = "rep. 2", values = as.numeric(
+                rep2_cor_feat[, grep(colnames(rep2_cor), pattern = i)]))
+        )
+        df <- rbind(df, df_i)
+    }
+    df$values <- as.numeric(df$values)
+    df$type <- factor(df$type, levels = c("Col-0", "SALK", line))
+    
+    ## replace rep. 1 and rep. 2 by information on metabolites 
+    ## (feature name, mz, rt)
+    df$rep[df$rep == "rep. 1"] <- paste(
+        feature_rep1, ", rep. 1<br>", "(*m/z* ", round(rep1_cor_feat[, "mz"], 4), 
+        ", ", round(rep1_cor_feat[, "rt"] / 60, 2), " min)", sep = "")
+    df$rep[df$rep == "rep. 2"] <- paste(
+        feature_rep2, ", rep. 2<br>", "(*m/z* ", round(rep2_cor_feat[, "mz"], 4), 
+        ", ", round(rep2_cor_feat[, "rt"] / 60, 2), " min)", sep = "")
+    df$rep <- factor(df$rep, levels = unique(df$rep))
+    
+    ## plot
+    ggplot(df, aes(x = type, y = values)) +
+        geom_boxplot() +
+        facet_wrap( ~ rep) +
+        xlab("") + ylab("log<sub>2</sub>-normalized intensities") +
+        #ggtitle(title_plot) +
+        mdthemes::md_theme_bw() +
+        mdthemes::as_md_theme(theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+            plot.title = element_text(size = 8)))
+}
+
+## SALK_024438
+create_plot(feature_rep1 = "feature_10432", feature_rep2 = "feature_8310",
+            line = "SALK_024438") 
+create_plot(feature_rep1 = "feature_13219", feature_rep2 = "feature_10756",
+            line = "SALK_024438") 
+
+## SALK_049338
+create_plot(feature_rep1 = "feature_12567", feature_rep2 = "feature_10151",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) + ## Col0, SALK
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(1), xend = c(5), y = c(15.5), annotation = c("***"),
+            rep = factor("feature_12567, rep. 1<br>(*m/z* 463.0885, 7.08 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(2), xend = c(5), y = c(15), annotation = c("***"),
+            rep = factor("feature_12567, rep. 1<br>(*m/z* 463.0885, 7.08 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(1), xend = c(5), y = c(14), annotation = c("***"),
+            rep = factor("feature_10151, rep. 2<br>(*m/z* 463.089, 7.01 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(2), xend = c(5), y = c(13.5), annotation = c("***"),
+            rep = factor("feature_10151, rep. 2<br>(*m/z* 463.089, 7.01 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+        ylim(6, 15.5)
+
+
+create_plot(feature_rep1 = "feature_15430", feature_rep2 = "feature_12897",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_18293", feature_rep2 = "feature_16038",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) +## Col0, SALK
+     ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(1), xend = c(5), y = c(21.5), annotation = c("***"),
+            rep = factor("feature_18293, rep. 1<br>(*m/z* 609.1466, 6.2 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(2), xend = c(5), y = c(21.0), annotation = c("***"),
+            rep = factor("feature_18293, rep. 1<br>(*m/z* 609.1466, 6.2 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(1), xend = c(5), y = c(21.5), annotation = c("***"),
+            rep = factor("feature_16038, rep. 2<br>(*m/z* 609.1469, 6.15 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(2), xend = c(5), y = c(21.0), annotation = c("***"),
+            rep = factor("feature_16038, rep. 2<br>(*m/z* 609.1469, 6.15 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+        ylim(12, 22)
+
+create_plot(feature_rep1 = "feature_18802", feature_rep2 = "feature_16608",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_18870", feature_rep2 = "feature_16686",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_19487", feature_rep2 = "feature_17374",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_19787", feature_rep2 = "feature_17722",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_20529", feature_rep2 = "feature_18573",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_21373", feature_rep2 = "feature_19592",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_21398", feature_rep2 = "feature_19634",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_21850", feature_rep2 = "feature_20191",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_22246", feature_rep2 = "feature_20687",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_22396", feature_rep2 = "feature_20876",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_22739", feature_rep2 = "feature_21344",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_23651", feature_rep2 = "feature_22557",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_23748", feature_rep2 = "feature_22688",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_24069", feature_rep2 = "feature_23097",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_26013", feature_rep2 = "feature_25445",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_27333", feature_rep2 = "feature_27062",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+
+
+create_plot(feature_rep1 = "feature_17696", feature_rep2 = "feature_15328",
+            line = c("SALK_011180", "SALK_021216", "SALK_049338")) + ## Col0, SALK
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(1), xend = c(5), y = c(21.5), annotation = c("*"),
+            rep = factor("feature_17696, rep. 1<br>(*m/z* 593.1516, 6.73 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+        ylim(19, 22)
+
+```
 
 
 ## Positive mode
@@ -1259,16 +1427,18 @@ perform_ttest <- function(features, rep1, rep1_neg, rep2_neg, line) {
     ## rep1_neg (include the information from the rep1 (one-sided t-test))
     fit_rep1_neg_col0 <- limma::contrasts.fit(fit_rep1_neg, contrast_rep1_neg_col0)
     fit_rep1_neg_col0 <- limma::eBayes(fit_rep1_neg_col0, trend = TRUE)
-    ttest_rep1_neg_col0 <- alternative_hypothesis(
-        fit_rep_n = fit_rep1_neg_col0, ttest_rep1 = ttest_rep1_col0,
-        features = features[!is.na(res_cor_rep1_neg)])
+    ttest_rep1_neg_col0 <- limma::topTable(fit_rep1_neg_col0, number = Inf, 
+        adjust.method = "fdr", p.value = 1)##alternative_hypothesis(
+        ##fit_rep_n = fit_rep1_neg_col0, ttest_rep1 = ttest_rep1_col0,
+        ##features = features[!is.na(res_cor_rep1_neg)])
     
     ## rep2_neg (include the information from the rep1 (one-sided t-test))
     fit_rep2_neg_col0 <- limma::contrasts.fit(fit_rep2_neg, contrast_rep2_neg_col0)
     fit_rep2_neg_col0 <- limma::eBayes(fit_rep2_neg_col0, trend = TRUE)
-    ttest_rep2_neg_col0 <- alternative_hypothesis(
-        fit_rep_n = fit_rep2_neg_col0, ttest_rep1 = ttest_rep1_col0,
-        features = features[!is.na(res_cor_rep2_neg)])
+    ttest_rep2_neg_col0 <- limma::topTable(fit_rep2_neg_col0, number = Inf, 
+        adjust.method = "fdr", p.value = 1)##alternative_hypothesis(
+        ##fit_rep_n = fit_rep2_neg_col0, ttest_rep1 = ttest_rep1_col0,
+        ##features = features[!is.na(res_cor_rep2_neg)])
 
     ## for salk
     ## rep1
@@ -1280,19 +1450,24 @@ perform_ttest <- function(features, rep1, rep1_neg, rep2_neg, line) {
     ## rep1_neg (include the information from the rep1 (one-sided t-test))
     fit_rep1_neg_salk <- limma::contrasts.fit(fit_rep1_neg, contrast_rep1_neg_salk)
     fit_rep1_neg_salk <- limma::eBayes(fit_rep1_neg_salk, trend = TRUE)
-    ttest_rep1_neg_salk <- alternative_hypothesis(
-        fit_rep_n = fit_rep1_neg_salk, ttest_rep1 = ttest_rep1_salk,
-        features = features[!is.na(res_cor_rep1_neg)])
+    ttest_rep1_neg_salk <- limma::topTable(fit_rep1_neg_salk, number = Inf, 
+        adjust.method = "fdr", p.value = 1)
+        #alternative_hypothesis(
+        #fit_rep_n = fit_rep1_neg_salk, ttest_rep1 = ttest_rep1_salk,
+        #features = features[!is.na(res_cor_rep1_neg)])
     
     ## rep2_neg (include the information from the rep1 (one-sided t-test))
     fit_rep2_neg_salk <- limma::contrasts.fit(fit_rep2_neg, contrast_rep2_neg_salk)
     fit_rep2_neg_salk <- limma::eBayes(fit_rep2_neg_salk, trend = TRUE)
-    ttest_rep2_neg_salk <- alternative_hypothesis(
-        fit_rep_n = fit_rep2_neg_salk, ttest_rep1 = ttest_rep1_salk,
-        features = unlist(features)[!is.na(res_cor_rep2_neg)])
+    ttest_rep2_neg_salk <- limma::topTable(fit_rep2_neg_salk, number = Inf, 
+        adjust.method = "fdr", p.value = 1)
+        # 
+        # alternative_hypothesis(###################################
+        # fit_rep_n = fit_rep2_neg_salk, ttest_rep1 = ttest_rep1_salk,
+        # features = unlist(features)[!is.na(res_cor_rep2_neg)])
     
     ## reconcile the results
-    cols <- c("logFC_rep1", "logFC_rep1_neg", "logFC_rep2_neg",
+    cols <- c("rep1_neg", "rep2_neg", "logFC_rep1", "logFC_rep1_neg", "logFC_rep2_neg",
         "adj.P.Val_rep1", "adj.P.Val_rep1_neg", "adj.P.Val_rep2_neg", 
         "P.Value_rep1", "P.Value_rep1_neg", "P.Value_rep2_neg",
         "AveExpr_rep1", "AveExpr_rep1_neg", "AveExpr_rep2_neg",
@@ -1304,7 +1479,7 @@ perform_ttest <- function(features, rep1, rep1_neg, rep2_neg, line) {
     colnames(ttest_rep1_neg_col0) <- paste0(colnames(ttest_rep1_neg_col0), "_rep1_neg")
     colnames(ttest_rep2_neg_col0) <- paste0(colnames(ttest_rep2_neg_col0), "_rep2_neg")
     ttest_col0 <- cbind(rep1 = rownames(ttest_rep1_col0), ttest_rep1_col0)
-    ttest_col0 <- dplyr::left_join(ttest_col0, mappings, by = "rep1")
+    ttest_col0 <- dplyr::left_join(ttest_col0, mappings, by = c("rep1" = "rep1"))
     ttest_col0 <- dplyr::left_join(ttest_col0, 
         cbind(rep1_neg = rownames(ttest_rep1_neg_col0), ttest_rep1_neg_col0),
         by = "rep1_neg")
@@ -1357,8 +1532,7 @@ negative and positive and find corresponding features in negative mode.
 If there is a match in the negative mode, find the feature with highest 
 correlation values in the negative mode (either from repl. 1 or repl. 2) 
 and perform a t-test on this feature in the data set of repl. 1 or repl. 2.
-If the feature is not found in at least one of negative repl. 1 and repl. 2, 
-check the feature with the second highest correlation, and so on.
+
 
 
 ```{r, echo = FALSE}
@@ -1393,6 +1567,9 @@ print("## Cluster_46305/Cluster_099304")
 pl_sel <- get_metabolite(pl = rep1, mz = 324.1805, rt = 7.36)
 print("324.1805/7.36")
 features[["Cluster_46305/Cluster_099304"]] <- rownames(pl_sel[1, ])
+
+## print features
+features
 
 tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
     rep2_neg = rep2_neg, line = "SALK_008908_3")
@@ -1456,6 +1633,9 @@ print("668.2914/5.10")
 print("no corresponding feature in rep1_neg and rep2_neg")
 #features[["Cluster_68765/Cluster_155231"]] <- rownames(pl_sel[3, ])
 
+## print features
+features
+
 tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
     rep2_neg = rep2_neg, line = "SALK_037430_4")
 print("Col0/SALK_037430")
@@ -1515,14 +1695,14 @@ print("## feature not found in repl. 1")
 print("## Cluster_43637/Cluster_019842")
 pl_sel <- get_metabolite(pl = rep1, mz = 292.0752, rt = 4.14)
 print("292.0752/4.13")
-print("no corresponding feature in rep1_neg and rep2_neg")
-#features[["Cluster_43637/Cluster_019842"]] <- rownames(pl_sel)
+print("no corresponding feature in rep2_neg")
+##features[["Cluster_43637/Cluster_019842"]] <- rownames(pl_sel)
 
 print("## Cluster_51292/Cluster_111920")
 pl_sel <- get_metabolite(pl = rep1, mz = 386.1802, rt = 2.74)
 print("386.1811/2.78")
 features[["Cluster_51292/Cluster_111920"]] <- rownames(pl_sel)
-print("no corresponding feature in repl. 2 neg")
+#print("no corresponding feature in repl. 2 neg")
 
 print("## Cluster_56806/Cluster_124429")
 pl_sel <- get_metabolite(pl = rep1, mz = 455.1151, rt = 3.70)
@@ -1546,7 +1726,7 @@ print("## Cluster_61036/Cluster_134803")
 pl_sel <- get_metabolite(pl = rep1, mz = 518.2228, rt = 2.99)
 print("518.2235/3.28")
 features[["Cluster_61036/Cluster_134803"]] <- rownames(pl_sel)
-print("no corresponding feature in rep2_neg")
+#print("no corresponding feature in rep2_neg")
 
 #print("## Cluster_61038/Cluster_134803")
 #pl_sel <- get_metabolite(pl = rep1, mz = 518.2225, rt = 3.25)
@@ -1560,7 +1740,7 @@ print("## feature not found in repl. 1")
 print("## Cluster_62414/Cluster_138008")
 pl_sel <- get_metabolite(pl = rep1, mz = 538.1556, rt = 5.04)
 print("538.1556/5.04")
-print("no corresponding feature in rep1_neg and rep2_neg")
+print("no corresponding feature in rep2_neg")
 #features[["Cluster_62414/Cluster_138008"]] <- rownames(pl_sel[2, ])
 
 print("## Cluster_62876/Cluster_139378")
@@ -1607,6 +1787,8 @@ print("## Cluster_74692/Cluster_172731")
 pl_sel <- get_metabolite(pl = rep1, mz = 890.3421, rt = 6.20)
 print("## feature not found in repl. 1")
 
+## print features
+features
 
 tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
     rep2_neg = rep2_neg, line = "SALK_072964_5")
@@ -1678,6 +1860,8 @@ pl_sel <- get_metabolite(pl = rep1, mz = 558.0525, rt = 6.39)
 print("558.0525/6.38")
 features[["Cluster_63530/Cluster_140991"]] <- rownames(pl_sel[2, ])
 
+## print features
+features
 
 tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
     rep2_neg = rep2_neg, line = "SALK_024438_5")
@@ -1725,13 +1909,13 @@ features[["Cluster_06986/Cluster_018383"]] <- rownames(pl_sel[3, ])
 
 print("## Cluster_06988/Cluster_018381")
 pl_sel <- get_metabolite(pl = rep1, mz = 280.5278, rt = 6.19)
-print("## 280.5278/6.19")
+#print("## 280.5278/6.19")
 #features[["Cluster_06988/Cluster_018381"]] <- rownames(pl_sel[2, ])
 print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
 print("## Cluster_07141/Cluster_018968")
 pl_sel <- get_metabolite(pl = rep1, mz = 285.0575, rt = 7.73)
-print("285.0575/7.73")
+#print("285.0575/7.73")
 #features[["Cluster_07141/Cluster_018968"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature found in rep1_neg and rep2_neg")
 
@@ -1741,7 +1925,7 @@ print("## feature not found in repl. 1")
 
 print("## Cluster_07452/Cluster_020029")
 pl_sel <- get_metabolite(pl = rep1, mz = 293.0550, rt = 6.20)
-print("## 293.0550/6.19")
+#print("## 293.0550/6.19")
 #features[["Cluster_07452/Cluster_020029"]] <- rownames(pl_sel)
 print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
@@ -1751,7 +1935,7 @@ print("## feature not found in repl. 1")
 
 print("## Cluster_08715/Cluster_023102")
 pl_sel <- get_metabolite(pl = rep1, mz = 317.0687, rt = 6.19)
-print("317.0687/6.19")
+#print("317.0687/6.19")
 #features[["Cluster_08715/Cluster_023102"]] <- rownames(pl_sel[2, ])
 print("## no corresponding feature in negative mode in rep1_neg and rep2_neg")
 
@@ -1773,7 +1957,7 @@ features[["Cluster_09094/Cluster_024158"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_09432/Cluster_024930")
 pl_sel <- get_metabolite(pl = rep1, mz = 332.0652, rt = 6.80)
-print("## 332.0652/6.80")
+#print("## 332.0652/6.80")
 #features[["Cluster_09432/Cluster_024930"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1797,13 +1981,13 @@ print("## feature not found in repl. 1")
 
 print("## Cluster_10475/Cluster_027427")
 pl_sel <- get_metabolite(pl = rep1, mz = 353.5568, rt = 6.19)
-print("# 353.5568/6.19")
+#print("# 353.5568/6.19")
 #features[["Cluster_10475/Cluster_027427"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_10527/Cluster_027529")
 pl_sel <- get_metabolite(pl = rep1, mz = 354.5584, rt = 6.19)
-print("## 354.5584/371.5415")
+#print("## 354.5584/371.5415")
 #features[["Cluster_10527/Cluster_027529"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1814,19 +1998,19 @@ features[["Cluster_10723/Cluster_027886"]] <- rownames(pl_sel[1, ])
 
 print("## Cluster_10854/Cluster_028123")
 pl_sel <- get_metabolite(pl = rep1, mz = 360.5646, rt = 6.80)
-print("## 360.5646/6.79")
+#print("## 360.5646/6.79")
 #features[["Cluster_10854/Cluster_028123"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_11067/Cluster_028666")
 pl_sel <- get_metabolite(pl = rep1, mz = 366.0840, rt = 6.19)
-print("## SALK_011180_5, 366.0840/6.19")
+#print("## SALK_011180_5, 366.0840/6.19")
 #features[["Cluster_11067/Cluster_028666"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_11415/Cluster_029357")
 pl_sel <- get_metabolite(pl = rep1, mz = 373.0919, rt = 6.80)
-print("## 373.0919/6.78")
+#print("## 373.0919/6.78")
 #features[["Cluster_11415/Cluster_029357"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1844,7 +2028,7 @@ print("feature not found in repl. 1")
 
 print("## Cluster_19567/Cluster_046010")
 pl_sel <- get_metabolite(pl = rep1, mz = 630.1343, rt = 6.20)
-print("## SALK_011180, 630.1343/6.19")
+#print("## SALK_011180, 630.1343/6.19")
 #features[["Cluster_19567/Cluster_046010"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1860,7 +2044,7 @@ print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_20408/Cluster_157992")
 pl_sel <- get_metabolite(pl = rep1, mz = 695.1127, rt = 6.19)
-print("## 696.1127/6.19")
+#print("## 696.1127/6.19")
 #features[["Cluster_20408/Cluster_157992"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1880,17 +2064,17 @@ features[["Cluster_43184/Cluster_091479"]] <- rownames(pl_sel[2, ])
 print("## Cluster_43185/Cluster_091480")
 pl_sel <- get_metabolite(pl = rep1, mz = 287.0545, rt = 6.65)
 #features[["Cluster_43185/Cluster_091480"]] <- rownames(pl_sel[1, ])
-print("no corresponding feature in rep1_neg and rep2_neg")
+#print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_43188/Cluster_091475")
 pl_sel <- get_metabolite(pl = rep1, mz = 287.0543, rt = 7.42)
-print("## 287.0547/7.42")
+#print("## 287.0547/7.42")
 #features[["Cluster_43188/Cluster_091475"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_44662/Cluster_094789")
 pl_sel <- get_metabolite(pl = rep1, mz = 303.0494, rt = 6.19)
-print("## 303.0494/6.19")
+#print("## 303.0494/6.19")
 #features[["Cluster_44662/Cluster_094789"]] <- rownames(pl_sel[1, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1905,7 +2089,7 @@ print(" feature not found in repl. 1")
 
 print("## Cluster_55108/Cluster_120556")
 pl_sel <- get_metabolite(pl = rep1, mz = 433.1120, rt = 6.52)
-print("## 433.1133/6.93") ## 2
+#print("## 433.1133/6.93") ## 2
 #features[["Cluster_55108/Cluster_120556"]] <- rownames(pl_sel[2, ])
 print("no corresponding feature in rep1_neg and rep2_neg")
 
@@ -1991,6 +2175,7 @@ features[["Cluster_67262/Cluster_151134"]] <- rownames(pl_sel[1, ])
 print("## Cluster_67877/Cluster_152801")
 pl_sel <- get_metabolite(pl = rep1, mz = 647.1585, rt = 6.79)
 print("## 647.1585/6.78")
+#features[["Cluster_67877/Cluster_152801"]] <- rownames(pl_sel)
 print("no corresponding feature in rep1_neg and rep2_neg")
 
 print("## Cluster_67970/Cluster_153028")
@@ -2016,6 +2201,8 @@ print("## Cluster_779.0616/Cluster_165448")
 pl_sel <- get_metabolite(pl = rep1, mz = 779.0616, rt = 6.05)
 print("## feature not found in repl. 1")
 
+## print features
+features
 
 tt <- perform_ttest(features = features, rep1 = rep1, rep1_neg = rep1_neg, 
     rep2_neg = rep2_neg, line = "SALK_011180_5")
@@ -2037,4 +2224,172 @@ print("Col0/SALK_049338_4")
 rmarkdown::paged_table(tt[["col0"]])
 print("SALK/SALK_049338_4")
 rmarkdown::paged_table(tt[["salk"]])
+```
+
+
+
+### Create plots 
+
+
+```{r plots_positive, echo = FALSE}
+create_plot <- function(feature_rep1 = "feature_15191", 
+    feature_rep1_neg = "feature_17824", feature_rep2_neg = "feature_15564", 
+    line = "SALK_081021") {
+    
+    
+    col0 <- c("Col_0_1", "Col_0_2", "Col_0_3", "Col_0_4", "Col_0_5", "Col_0_6",
+        "Col_0_7", "Col_0_8", "Col_0_9", "Col_0_10")
+    other_salk_lines <- c("mz", "rt", "npeaks", "adduct", "pcgroup", 
+        "mapping_rep1_rep2", "cor", "rt_dev", "mz_dev", col0, line)
+    salk_rep1 <- !grepl(colnames(rep1), 
+        pattern = paste(other_salk_lines, collapse = "|"))
+    salk_rep1_neg <- !grepl(colnames(rep1_neg), 
+        pattern = paste(other_salk_lines, collapse = "|"))
+    salk_rep2_neg <- !grepl(colnames(rep2_neg), 
+        pattern = paste(other_salk_lines, collapse = "|"))
+    rep1_feat <- rep1[feature_rep1, ]
+    rep1_neg_feat <- rep1_neg[feature_rep1_neg, ]
+    rep2_neg_feat <- rep2_neg[feature_rep2_neg, ]
+    
+    df <- rbind(
+        cbind(type = "Col-0", rep = "rep. 1",
+            values = as.numeric(rep1_feat[, col0])),
+        cbind(type = "SALK", rep = "rep. 1", 
+            values = as.numeric(rep1_feat[, salk_rep1])),
+        cbind(type = "Col-0", rep = "rep. 1 neg",
+            values = as.numeric(rep1_neg_feat[, col0])),
+        cbind(type = "SALK", rep = "rep. 1 neg", 
+            values = as.numeric(rep1_neg_feat[, salk_rep1_neg])),
+        cbind(type = "Col-0", rep = "rep. 2 neg", 
+            values = as.numeric(rep2_neg_feat[, col0])),
+        cbind(type = "SALK", rep = "rep. 2 neg",
+            values = as.numeric(rep2_neg_feat[, salk_rep2_neg]))
+    ) |>
+        data.frame()
+    
+    for (i in line) {
+        df_i <- rbind(
+            cbind(type = i, rep = "rep. 1", values = as.numeric(
+                rep1_feat[, grep(colnames(rep1), pattern = i)])),
+            cbind(type = i, rep = "rep. 1 neg", values = as.numeric(
+                rep1_neg_feat[, grep(colnames(rep1_neg), pattern = i)])),
+            cbind(type = i, rep = "rep. 2 neg", values = as.numeric(
+                rep2_neg_feat[, grep(colnames(rep2_neg), pattern = i)]))
+        )
+        df <- rbind(df, df_i)
+    }
+    df$values <- as.numeric(df$values)
+    df$type <- factor(df$type, levels = c("Col-0", "SALK", line))
+    
+    ## replace rep. 1, rep. 1 neg and rep. 2 neg by information on metabolites 
+    ## (feature name, mz, rt)
+    df$rep[df$rep == "rep. 1"] <- paste(
+        feature_rep1, ", rep. 1<br>", "(*m/z* ", round(rep1_feat[, "mz"], 4), 
+        ", ", round(rep1_feat[, "rt"] / 60, 2), " min)", sep = "")
+    df$rep[df$rep == "rep. 1 neg"] <- paste(
+        feature_rep1_neg, ", rep. 1 neg<br>", "(*m/z* ", 
+        round(rep1_neg_feat[, "mz"], 4), ", ", 
+        round(rep1_neg_feat[, "rt"] / 60, 2), " min)", sep = "")
+    df$rep[df$rep == "rep. 2 neg"] <- paste(
+        feature_rep2_neg, ", rep. 2 neg<br>", "(*m/z* ", 
+        round(rep2_neg_feat[, "mz"], 4), ", ", 
+        round(rep2_neg_feat[, "rt"] / 60, 2), " min)", sep = "")
+    df$rep <- factor(df$rep, levels = unique(df$rep))
+    
+    ## plot
+    ggplot(df, aes(x = type, y = values)) +
+        geom_boxplot() +
+        facet_wrap( ~ rep) +
+        xlab("") + ylab("log<sub>2</sub>-normalized intensities") +
+        #ggtitle(title_plot) +
+        mdthemes::md_theme_bw() +
+        mdthemes::as_md_theme(theme(
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+            plot.title = element_text(size = 8)))
+}
+## SALK_008908
+create_plot(feature_rep1 = "feature_6235", feature_rep1_neg = "feature_10405",
+            feature_rep2_neg = "feature_8298", line = "SALK_008908")
+
+## SALK_081021
+create_plot(feature_rep1 = "feature_15191", 
+    feature_rep1_neg = "feature_17824", feature_rep2_neg = "feature_15564",
+    line = "SALK_081021")
+
+## SALK_024438
+create_plot(feature_rep1 = "feature_19111", 
+    feature_rep1_neg = "feature_13198", feature_rep2_neg = "feature_10756",
+    line = "SALK_024438")
+create_plot(feature_rep1 = "feature_744", 
+    feature_rep1_neg = "feature_13198", feature_rep2_neg = "feature_10756",
+    line = "SALK_024438")
+create_plot(feature_rep1 = "feature_1990", 
+    feature_rep1_neg = "feature_13198", feature_rep2_neg = "feature_10756",
+    line = "SALK_024438")
+create_plot(feature_rep1 = "feature_13137", 
+    feature_rep1_neg = "feature_13198", feature_rep2_neg = "feature_10756",
+    line = "SALK_024438")
+create_plot(feature_rep1 = "feature_14318", 
+    feature_rep1_neg = "feature_13198", feature_rep2_neg = "feature_10756",
+    line = "SALK_024438")
+create_plot(feature_rep1 = "feature_20785", 
+    feature_rep1_neg = "feature_13198", feature_rep2_neg = "feature_10756",
+    line = "SALK_024438")
+
+## SALK_049338
+create_plot(feature_rep1 = "feature_6559", 
+    feature_rep1_neg = "feature_15393", feature_rep2_neg = "feature_12897",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_6558", 
+    feature_rep1_neg = "feature_18237", feature_rep2_neg = "feature_16038",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_6914", 
+    feature_rep1_neg = "feature_15393", feature_rep2_neg = "feature_12897",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_9030", 
+    feature_rep1_neg = "feature_20453", feature_rep2_neg = "feature_18573",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_9827", 
+    feature_rep1_neg = "feature_19905", feature_rep2_neg = "feature_17945",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0
+create_plot(feature_rep1 = "feature_10280", 
+    feature_rep1_neg = "feature_20453", feature_rep2_neg = "feature_18573",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_8025", 
+    feature_rep1_neg = "feature_15393", feature_rep2_neg = "feature_12897",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+# create_plot(feature_rep1 = "feature_15861", 
+#     feature_rep1_neg = "feature_19416", feature_rep2_neg = "feature_17374",
+#     line = c("SALK_011180", "SALK_021216", "SALK_049338")) +## Col0, SALK
+
+    
+    
+create_plot(feature_rep1 = "feature_22378", 
+    feature_rep1_neg = "feature_19416", feature_rep2_neg = "feature_17374",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) +## Col0, SALK
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(1), xend = c(5), y = c(21.5), annotation = c("***"),
+            rep = factor("feature_22378, rep. 1<br>(*m/z* 611.1617, 6.19 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+    ggsignif::geom_signif(stat = "identity",
+        data = data.frame(x = c(2), xend = c(5), y = c(21.0), annotation = c("***"),
+            rep = factor("feature_22378, rep. 1<br>(*m/z* 611.1617, 6.19 min)")),
+            aes(x=x, xend=xend, y=y, yend=y, annotation=annotation)) +
+        ylim(12, 22)
+    
+    
+    
+create_plot(feature_rep1 = "feature_22565", 
+    feature_rep1_neg = "feature_19905", feature_rep2_neg = "feature_17945",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0
+create_plot(feature_rep1 = "feature_23035", 
+    feature_rep1_neg = "feature_20453", feature_rep2_neg = "feature_18573",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+create_plot(feature_rep1 = "feature_23441", 
+    feature_rep1_neg = "feature_20453", feature_rep2_neg = "feature_18573",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
+
+create_plot(feature_rep1 = "feature_21907", 
+    feature_rep1_neg = "feature_17646", feature_rep2_neg = "feature_15328",
+    line = c("SALK_011180", "SALK_021216", "SALK_049338")) ## Col0, SALK
 ```
