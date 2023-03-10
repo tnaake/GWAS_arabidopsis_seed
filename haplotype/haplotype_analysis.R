@@ -1,5 +1,5 @@
 ## load SNP data
-setwd("~/Documents/01_GWAS/01_Data/GWAS_script/LD/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/LD/")
 load("../LD/Data/TAIR9.RData")
 
 ## load package ape
@@ -7,7 +7,7 @@ load("../LD/Data/TAIR9.RData")
 library(ape) 
 
 ## input the association to check
-setwd("W:/Thomas/Data/arabidopsis_seed/00_two_biological_replicates_results/results_build_loci")
+setwd("~/GitHub/GWAS_arabidopsis_seed/results_build_loci/")
 options(stringsAsFactors=FALSE)
 PC_input_1 <- read.table("gwas_gene_info_seed_1_neg.txt", header = TRUE, 
     sep = "\t", quote = "\"", dec = ".", comment.char = "")
@@ -79,9 +79,9 @@ colnames(PC_input_1)[3:4] <- c("Gene", "metabolite")
 colnames(PC_input_2)[3:4] <- c("Gene", "metabolite")
 
 ## load metabolite data
-Data_1 <- read.table("~/Documents/01_GWAS/01_Data/00_two_biological_replicates/DMN_ecotypes_seed1_negative.txt", 
+Data_1 <- read.table("~/GitHub/GWAS_arabidopsis_seed/DMN_ecotypes_seed1_negative.txt", 
     header = TRUE, sep = "\t",quote = "\"",dec = ".",comment.char = "")
-Data_2 <- read.table("~/Documents/01_GWAS/01_Data/00_two_biological_replicates/DMN_ecotypes_seed2_negative.txt", 
+Data_2 <- read.table("~/GitHub/GWAS_arabidopsis_seed/DMN_ecotypes_seed2_negative.txt", 
     header = TRUE, sep = "\t",quote = "\"",dec = ".",comment.char = "")
 
 ## remove m/z and retention time
@@ -98,7 +98,7 @@ Taxa_2 <- as.character(Data_2[, 1])
 Taxa <- intersect(Taxa_1, Taxa_2)
 
 ## load SNP info (contains SNP from all chromosomes):
-load("~/Documents/01_GWAS/01_Data/GWAS_script/LD/Data/SNP_chr2.RData")
+load("~/GitHub/GWAS_arabidopsis_seed/LD/Data/SNP_chr2.RData")
 SNP_chr2_part1 <- SNP_chr2[, 1:4]
 SNP_chr2_part2 <- SNP_chr2[ , 12:ncol(SNP_chr2)]
 
@@ -289,7 +289,7 @@ getPairs <- function(g) {
 
 ## start here with the actual analysis
 ## run the following for replicate 1 and replicate 2
-setwd("~/Documents/01_GWAS/01_Data/GWAS_script/haplotype/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/haplotype/")
 rep <- "rep_1"
 
 if (rep == "rep_1") {

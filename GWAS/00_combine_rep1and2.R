@@ -1,5 +1,5 @@
 ## read data
-setwd("~/01_GWAS/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/GWAS/")
 
 polarity <- "positive"
 

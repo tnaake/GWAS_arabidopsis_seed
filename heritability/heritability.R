@@ -1,6 +1,6 @@
 ### Calculate broad-sense heritability:
 options(stringsAsFactors = FALSE)
-setwd("~/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/")
 ion_mode <- "neg"
 
 ## for positive mode
@@ -148,7 +148,7 @@ line.blup <- cbind(id, do.call("cbind", line.blup))
 colnames(line.blup) <- c("line", names(x)[-c(1:2)])
 
 ## write to files
-setwd("~/Documents/01_GWAS/01_Data/GWAS_script/heritability")
+setwd("~/GitHub/GWAS_arabidopsis_seed/heritability")
 
 if (ion_mode == "pos") {
     write.table(heritability, "BroadSenseHeritability3e_pos_seed.csv", sep = ",", quote = F)
@@ -173,8 +173,8 @@ h2_input_pos <- read.table("H2_input_pos.csv", sep = ",", header = TRUE)
 h2_input_neg <- read.table("H2_input_neg.csv", sep = ",", header = TRUE)
 
 ## get for mapped ones
-mapped_pos <- read.table("../../00_two_biological_replicates/gwas_complete_met_all_pos.txt", sep = "\t", header = TRUE)
-mapped_neg <- read.table("../../00_two_biological_replicates/gwas_complete_met_all_neg.txt", sep = "\t", header = TRUE)    
+mapped_pos <- read.table("../gwas_complete_met_all_pos.txt", sep = "\t", header = TRUE)
+mapped_neg <- read.table("../gwas_complete_met_all_neg.txt", sep = "\t", header = TRUE)    
 
 ## mapped for both replicates
 mapped_uniq_pos <- unique(mapped_pos[mapped_pos$locus_tag_seed1 != "" & 
@@ -204,7 +204,7 @@ g <- ggplot(df, aes(y = values, x = type, fill = type)) +
     geom_boxplot(width = 0.1, color = "black", alpha = 0.75, position = dodge) + facet_grid(~ion_mode) +
     theme_bw() + ylab("heritability") 
 
-setwd("~/Documents/01_GWAS/01_Data/GWAS_script/heritability")
+setwd("~/GitHub/GWAS_arabidopsis_seed/heritability")
 ggsave(g, filename = "plot_heritability_mass_features_violin.pdf", device = "pdf")
 
 ## plot correlation values between matched metabolite pairs
@@ -233,7 +233,7 @@ g <- ggplot(df, aes(y = values, x = type, fill = type)) +
   geom_boxplot(width = 0.1, color = "black", alpha = 0.75, position = dodge) + facet_grid(~ion_mode) +
   theme_bw() + ylab("Pearson correlation") 
 
-setwd("~/Documents/01_GWAS/01_Data/GWAS_script/heritability")
+setwd("~/GitHub/GWAS_arabidopsis_seed/heritability")
 ggsave(g, filename = "plot_correlation_mass_features_violin.pdf", device = "pdf")
 
 ## plot retention time for seed1 (all + mapped, pos and neg)
@@ -260,12 +260,12 @@ g <- ggplot(df) +
     theme_bw() + xlab("retention time [min]") + 
     ylab("density (number of mass features)")
 
-setwd("~/Documents/01_GWAS/01_Data/GWAS_script/heritability")
+setwd("~/GitHub/GWAS_arabidopsis_seed/heritability")
 ggsave(g, filename = "plot_density_rettime_mass_features.pdf", device = "pdf")
 
 ## truncate the table with mapping results (overlap) that it only contains those features
 ## meet the criteria (mz_dev, rt_dev, corr)
-setwd("~/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/")
 loci_pos <- read.table("gwas_complete_met_all_trueLociLOD_pos.txt", sep = "\t", header = TRUE)
 loci_neg <- read.table("gwas_complete_met_all_trueLociLOD_neg.txt", sep = "\t", header = TRUE)
 

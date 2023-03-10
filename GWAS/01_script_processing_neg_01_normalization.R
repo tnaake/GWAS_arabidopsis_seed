@@ -1,6 +1,5 @@
 ###############################################################################
-setwd("/home/naake/01_GWAS/")
-setwd("~/winhome/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/GWAS/")
 met1 <- read.table("rep1_negative_match.csv", sep = "\t", quote = "")
 met2 <- read.table("rep2_negative_match.csv", sep = "\t", quote = "")
 

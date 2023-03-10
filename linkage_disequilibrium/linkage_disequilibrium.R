@@ -1,4 +1,5 @@
-setwd("~/winhome/Documents/01_GWAS/01_Data/GWAS_script/LD")
+
+setwd("~/GitHub/GWAS_arabidopsis_seed/LD")
 
 ## script to make the LD figure
 library(GenABEL)

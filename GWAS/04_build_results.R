@@ -1,6 +1,6 @@
 ## change path
 options(stringsAsFactors = FALSE)
-setwd("~/AG-Fernie/Thomas/Data/arabidopsis_seed/00_two_biological_replicates_results/results_build_loci/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/results_build_loci")
 
 polarity <- "pos"
 ## change 
@@ -23,7 +23,7 @@ if (polarity == "pos") {
 }
 
 ## load file with relation about metabolites (contains also information on m/z and rt of each metabolite)
-setwd("~/winhome/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/")
 
 if (polarity == "neg") {
     rel_rep1 <- read.csv("rep1_negative_match.csv", sep = "\t")
@@ -174,17 +174,17 @@ if (polarity == "pos") {
 options(stringsAsFactors = FALSE)
 
 if (polarity == "neg") {
-    setwd("~/winhome/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
-    res <- read.table("gwas_complete_met_all_neg.txt", sep = "\t", dec = ".", header = TRUE)   
-    setwd("~/AG-Fernie/Thomas/Data/arabidopsis_seed/00_two_biological_replicates_results/results_build_loci")
+    setwd("~/GitHub/GWAS_arabidopsis_seed/")
+    res <- read.table("gwas_complete_met_all_neg.txt", sep = "\t", dec = ".", header = TRUE) 
+    setwd("~/GitHub/GWAS_arabidopsis_seed/results_build_loci")
     seed1 <- read.csv("gwas_locus_info_seed_1_neg.txt", header = TRUE, sep = "\t")
     seed2 <- read.csv("gwas_locus_info_seed_2_neg.txt", header = TRUE, sep = "\t")
     leaf2 <- read.csv("gwas_locus_info_leaf_neg.txt", header = TRUE, sep = "\t")
 }
 if (polarity == "pos") {
-    setwd("~/winhome/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+    setwd("~/GitHub/GWAS_arabidopsis_seed/")
     res <- read.table("gwas_complete_met_all_pos.txt", sep = "\t", dec = ".", header = TRUE) 
-    setwd("~/AG-Fernie/Thomas/Data/arabidopsis_seed/00_two_biological_replicates_results/results_build_loci")
+    setwd("~/GitHub/GWAS_arabidopsis_seed//results_build_loci")
     seed1 <- read.csv("gwas_locus_info_seed_1_pos.txt", header = TRUE, sep = "\t")
     seed2 <- read.csv("gwas_locus_info_seed_2_pos.txt", header = TRUE, sep = "\t")
     leaf2 <- read.csv("gwas_locus_info_leaf_pos.txt", header = TRUE, sep = "\t")
@@ -214,12 +214,12 @@ for (i in 1:nrow(res)) {
     }
 }
 if (polarity == "neg") {
-    setwd("~/winhome/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+    setwd("~/GitHub/GWAS_arabidopsis_seed/")
     write.table(res, file = "gwas_complete_met_all_trueLociLOD_neg.txt", 
         sep = "\t", dec = ".", quote = FALSE, row.names = FALSE)
 } 
 if (polarity == "pos") {
-    setwd("~/winhome/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+    setwd("~/GitHub/GWAS_arabidopsis_seed/")
     write.table(res, file = "gwas_complete_met_all_trueLociLOD_pos.txt", 
         sep = "\t", dec = ".", quote = FALSE, row.names = FALSE)
 }

@@ -3,7 +3,7 @@
 ################################################################################
 
 options(stringsAsFactors = FALSE)
-setwd("H:/Documents/01_GWAS/01_Data/00_two_biological_replicates/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/")
 rel_rep1 <- read.csv("rep1_negative_match.csv", sep = "\t")
 rel_rep2 <- read.csv("rep2_negative_match.csv", sep = "\t")
 

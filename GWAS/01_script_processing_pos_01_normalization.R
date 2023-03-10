@@ -1,7 +1,7 @@
 library(gdps)
 memory.limit(56000)
 ###############################################################################
-setwd("/home/naake/01_GWAS/")
+setwd("~/GitHub/GWAS_arabidopsis_seed/GWAS/")
 met1 <- read.table("rep1_positive_match.csv", sep = "\t", quote = "")
 met2 <- read.table("rep2_positive_match.csv", sep = "\t", quote = "")
 
