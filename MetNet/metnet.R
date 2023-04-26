@@ -214,14 +214,14 @@ hist(assay(stat_adj_neg, "spearman_coef"))
 dev.off()
 
 ## check thresholds
-table(assay(stat_adj_neg, "pearson_coef")[upper.tri(assay(stat_adj_neg, "pearson_coef"))] > 0.5)
-table(assay(stat_adj_pos, "pearson_coef")[upper.tri(assay(stat_adj_pos, "pearson_coef"))] > 0.5)
-table(assay(stat_adj_neg, "spearman_coef")[upper.tri(assay(stat_adj_neg, "spearman_coef"))] > 0.5)
-table(assay(stat_adj_pos, "spearman)coef")[upper.tri(assay(stat_adj_pos, "spearman_coef"))] > 0.5)
+table(assay(stat_adj_neg, "pearson_coef")[upper.tri(assay(stat_adj_neg, "pearson_coef"))] > 0.7)
+table(assay(stat_adj_pos, "pearson_coef")[upper.tri(assay(stat_adj_pos, "pearson_coef"))] > 0.7)
+table(assay(stat_adj_neg, "spearman_coef")[upper.tri(assay(stat_adj_neg, "spearman_coef"))] > 0.6)
+table(assay(stat_adj_pos, "spearman_coef")[upper.tri(assay(stat_adj_pos, "spearman_coef"))] > 0.6)
 
 
 args <- list(
-    filter = "pearson_coef > 0.7 & spearman_coef > 0.5 & pearson_pvalue < 0.05 & spearman_pvalue < 0.05")
+    filter = "pearson_coef > 0.7 & spearman_coef > 0.6 & pearson_pvalue < 0.05 & spearman_pvalue < 0.05")
 stat_adj_pos_thr <- threshold(am = stat_adj_pos, type = "threshold", 
     args = args)
 stat_adj_neg_thr <- threshold(am = stat_adj_neg, type = "threshold", 
@@ -230,9 +230,9 @@ stat_adj_neg_thr <- threshold(am = stat_adj_neg, type = "threshold",
 ## type = "top2"
 args_top <- list(n = 10000)
 stat_adj_pos_top2 <- threshold(am = stat_adj_pos, type = "top2",
-                               args = args_top)
+    args = args_top)
 stat_adj_neg_top2 <- threshold(am = stat_adj_neg, type = "top2",
-                               args = args_top)
+    args = args_top)
 
 save(stat_adj_pos_thr, stat_adj_pos_top2, file = "MetNet_seed_stat_adj_thr_pos.RData")
 save(stat_adj_neg_thr, stat_adj_neg_top2, file = "MetNet_seed_stat_adj_thr_neg.RData")
