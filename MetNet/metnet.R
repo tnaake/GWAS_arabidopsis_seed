@@ -249,6 +249,8 @@ save(cons_adj_neg, file = "MetNet_seed_cons_adj_neg.RData")
 ## remove adducts
 cons_adj_pos_rem <- cons_adj_pos
 cons_adj_neg_rem <- cons_adj_neg
+
+## positive mode
 rt <- lapply(strsplit(rownames(cons_adj_pos), split = "_"), "[", 4) |>
     unlist() |>
     as.numeric()
@@ -257,13 +259,14 @@ for (i in 1:ncol(cons_adj_pos_rem)) {
         grepl(assay(cons_adj_pos_rem, "combine_group")[, i], pattern = "adduct_"))
     if (length(inds) > 0) {
         assay(cons_adj_pos_rem, "combine_binary")[inds, i] <- 0
-        assay(cons_adj_pos_rem, "combine_group")[inds, i] <- 0
+        assay(cons_adj_pos_rem, "combine_group")[inds, i] <- ""
         assay(cons_adj_pos_rem, "combine_mass")[inds, i] <- ""
         assay(cons_adj_pos_rem, "combine_rt")[inds, i] <- ""
-        assay(cons_adj_pos_rem, "combine_group")[inds, i] <- ""  
     }
     
 }
+
+## negative mode
 rt <- lapply(strsplit(rownames(cons_adj_neg), split = "_"), "[", 4) |>
     unlist() |>
     as.numeric()
@@ -275,7 +278,6 @@ for (i in 1:ncol(cons_adj_neg_rem)) {
         assay(cons_adj_neg_rem, "combine_group")[inds, i] <- 0
         assay(cons_adj_neg_rem, "combine_mass")[inds, i] <- ""
         assay(cons_adj_neg_rem, "combine_rt")[inds, i] <- ""
-        assay(cons_adj_neg_rem, "combine_group")[inds, i] <- ""  
     }
 }
 save(cons_adj_pos_rem, file = "MetNet_seed_cons_adj_pos_rem.RData")
