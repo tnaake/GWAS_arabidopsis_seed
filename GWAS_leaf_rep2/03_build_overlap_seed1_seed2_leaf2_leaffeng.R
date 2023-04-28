@@ -4,11 +4,12 @@ setwd("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/")
 
 ## load the file from Feng
 leaf_feng_normalized <- read.delim(
-    "files_feng/normalized//Thomasgwas_gene_info_final_normalized.txt", 
-    header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 36107 47
+    "files_feng/combine_results/normalized/normalized_gwas_gene_info.txt",
+    ##"files_feng/normalized//Thomasgwas_gene_info_final_normalized.txt", 
+    header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 17835 210 ## 36107 47
 leaf_feng_batch <- read.delim(
-    "files_feng/normalized_batch_corrected/Thomasgwas_gene_info_final_normalized_batch_corrected.txt", 
-    header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 36107 47
+    "files_feng/combine_results/normalized_batch_corrected/normalized_batch_corrected_gwas_gene_info.txt", 
+    header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 17553 152 ## 36107 47
 
 ## load the gwas_complete_met_all_trueLociLOD_neg.txt file that contains the
 ## relations between seed1, seed2, leaf2
@@ -173,82 +174,9 @@ trueLociLOD_batch <- add_to_trueLociLOD(gene_info = leaf_feng_batch,
     trueLociLOD = trueLociLOD)
 
 
-## the trueLociLOD will now be truncated such that they only contain the mass
-## features of the core set
-mapping_rep1_rep2 <- strsplit(rel_rep2[, "mapping_rep1_rep2"], split = "/")
-mapping_df <- data.frame(
-    rep1 = unlist(lapply(mapping_rep1_rep2, "[", 1)),
-    rep2 = unlist(lapply(mapping_rep1_rep2, "[", 2))
-)
-mapping_rep2_rep_feng <- strsplit(rel_rep_feng[, "mapping_rep2_rep_feng"], 
-    split = "/")
-mapping_df_tmp <- data.frame(
-    rep2 = unlist(lapply(mapping_rep2_rep_feng,"[", 1)),
-    rep_feng = unlist(lapply(mapping_rep2_rep_feng, "[", 2))
-)
-mapping_df_all <- dplyr::inner_join(mapping_df, mapping_df_tmp, 
-    by = "rep2", multiple = "all")
-mapping_df_all <- mapping_df_all[!duplicated(
-    paste(mapping_df_all$rep1, mapping_df_all$rep2, mapping_df_all$rep_feng)), ]
-
-## create the UpSet plots
-
-## first create binary matrices, fill the entries if 1 to the number of 
-## row to mimic unique names
-## original file
-cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2")
-##cols_lod <- c("bestSNP_lod_seed1", "bestSNP_lod_seed2", "bestSNP_lod_leaf2")
-binary_mat <- trueLociLOD |>
-    dplyr::filter(met_rep1 %in% mapping_df$rep1) |>
-    dplyr::filter(met_rep2 %in% mapping_df$rep2) |>
-    dplyr::select(all_of(cols))
-binary_mat <- ifelse(is.na(binary_mat) | binary_mat == "", 0, 1) |>
-    as.data.frame()
-l <- lapply(binary_mat, function(col_i) {
-    .names <- ifelse(col_i == 1, seq_len(nrow(binary_mat)), 0)
-    .names[.names != 0]
-})
-l <- UpSetR::fromList(l)
-## for normalized
-cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2", 
-          "locus_tag_leaf_feng")
-binary_mat_normalized <- trueLociLOD_normalized |>
-    dplyr::filter(
-        met_rep1 %in% mapping_df_all$rep1 | is.na(met_rep1)) |>
-    dplyr::filter(
-        met_rep2 %in% mapping_df_all$rep2 | is.na(met_rep2)) |>
-    dplyr::filter(
-        met_leaf_feng %in% mapping_df_all$rep_feng | is.na(met_leaf_feng)) |>
-    dplyr::select(all_of(cols))
-binary_mat_normalized <- ifelse(
-    is.na(binary_mat_normalized) | binary_mat_normalized == "", 0, 1) |>
-    as.data.frame()
-l_normalized <- lapply(binary_mat_normalized, function(col_i) {
-    .names <- ifelse(col_i == 1, seq_len(nrow(binary_mat_normalized)), 0)
-    .names[.names != 0]
-})
-l_normalized <- UpSetR::fromList(l_normalized)
-## for batch
-cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2", 
-          "locus_tag_leaf_feng")
-binary_mat_batch <- trueLociLOD_batch |>
-    dplyr::filter(
-        met_rep1 %in% mapping_df_all$rep1 | is.na(met_rep1)) |>
-    dplyr::filter(
-        met_rep2 %in% mapping_df_all$rep2 | is.na(met_rep2)) |>
-    dplyr::filter(
-        met_leaf_feng %in% mapping_df_all$rep_feng | is.na(met_leaf_feng)) |>
-    dplyr::select(all_of(cols))
-binary_mat_batch <- ifelse(
-    is.na(binary_mat_batch) | binary_mat_batch == "", 0, 1) |>
-    as.data.frame()
-l_batch <- lapply(binary_mat_batch, function(col_i) {
-    .names <- ifelse(col_i == 1, seq_len(nrow(binary_mat_batch)), 0)
-    .names[.names != 0]
-})
-l_batch <- UpSetR::fromList(l_batch)
-
-## do the actual plotting
-UpSetR::upset(l, order.by = "freq")
-UpSetR::upset(l_normalized, order.by = "freq")
-UpSetR::upset(l_batch, order.by = "freq")
+write.table(trueLociLOD_normalized, 
+    file = "~/GitHub/GWAS_arabidopsis_seed/gwas_complete_met_all_trueLociLOD_rep12_normalized_neg.txt",
+    sep = "\t", dec = ".", quote = FALSE)
+write.table(trueLociLOD_batch,
+    file = "~/GitHub/GWAS_arabidopsis_seed/gwas_complete_met_all_trueLociLOD_rep12_normalized_batch_corrected.txt", 
+    sep = "\t", dec = ".", quote = FALSE)
