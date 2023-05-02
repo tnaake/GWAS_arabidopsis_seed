@@ -105,7 +105,7 @@ add_to_trueLociLOD <- function(gene_info = leaf_feng, loci_info = leaf_feng_loci
     ## 6.3) iterate through unique loci and check overlap with trueLociLOD
     for (i in unique_loci_u) {
         
-        gene_info_loci <- gene_info[gene_info$unique_loci== i, ]
+        gene_info_loci <- gene_info[gene_info$unique_loci == i, ]
         
         ## find mass features
         features_i <- gene_info_loci[, cols_features] |> 
@@ -160,7 +160,14 @@ add_to_trueLociLOD <- function(gene_info = leaf_feng, loci_info = leaf_feng_loci
             trueLociLOD_res[["bestSNP_lod_leaf_feng"]][ind] <-
                 max(loci_info[
                     loci_info[["locusID"]] %in% unique(gene_info_loci[["locusID"]]) &
-                    loci_info[["Peak.ID"]] %in% features_i_j, "lod"])
+                    loci_info[["Peak.ID"]] %in% paste0("MLM.", features_i_j), "lod"], 
+                na.rm = TRUE)
+            #if (trueLociLOD_res[["bestSNP_lod_leaf_feng"]][ind] == -Inf) {
+            #    print(features_i_j)
+            #    print(i)
+            #    stop("stop")
+            #}
+            
                 ##unique(gene_info_loci[["best_SNP_lod"]])
             trueLociLOD_res[["locus_tag_leaf_feng"]][ind] <-
                 paste(gene_info_loci[["locus_tag"]][1], 
@@ -181,7 +188,6 @@ trueLociLOD_normalized <- add_to_trueLociLOD(gene_info = leaf_feng_normalized,
     loci_info = leaf_feng_normalized_loci_info, trueLociLOD = trueLociLOD)
 trueLociLOD_batch <- add_to_trueLociLOD(gene_info = leaf_feng_batch, 
     loci_info = leaf_feng_batch_loci_info, trueLociLOD = trueLociLOD)
-
 
 write.table(trueLociLOD_normalized, 
     file = "~/GitHub/GWAS_arabidopsis_seed/gwas_complete_met_all_trueLociLOD_rep12_normalized_neg.txt",
