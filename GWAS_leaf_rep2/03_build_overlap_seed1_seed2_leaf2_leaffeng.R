@@ -4,12 +4,18 @@ setwd("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/")
 
 ## load the file from Feng
 leaf_feng_normalized <- read.delim(
-    "files_feng/combine_results/normalized/normalized_gwas_gene_info.txt",
-    ##"files_feng/normalized//Thomasgwas_gene_info_final_normalized.txt", 
+    "files_feng/combine_results/normalized/normalized_gwas_gene_info.txt", 
     header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 17835 210 ## 36107 47
+leaf_feng_normalized_loci_info <- read.delim(
+    "files_feng/combine_results/normalized/normalized_gwas_loci_info.txt",
+    header = TRUE,sep = "\t", dec = ".", quote = "")
 leaf_feng_batch <- read.delim(
     "files_feng/combine_results/normalized_batch_corrected/normalized_batch_corrected_gwas_gene_info.txt", 
     header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 17553 152 ## 36107 47
+leaf_feng_batch_loci_info <- read.delim(
+    "files_feng/combine_results/normalized_batch_corrected/normalized_batch_corrected_gwas_locus_info.txt", 
+    header = TRUE, sep = "\t", dec = ".", quote = "") ## dim 17553 152 ## 36107 47
+
 
 ## load the gwas_complete_met_all_trueLociLOD_neg.txt file that contains the
 ## relations between seed1, seed2, leaf2
@@ -33,7 +39,7 @@ mapping_rep2 <- mapping_rep2[
     !duplicated(paste(names(mapping_rep2), as.character(mapping_rep2)))]
 
 
-add_to_trueLociLOD <- function(gene_info = leaf_feng, trueLociLOD = trueLociLOD) {
+add_to_trueLociLOD <- function(gene_info = leaf_feng, loci_info = leaf_feng_loci_info, trueLociLOD = trueLociLOD) {
     
     ## 1) add columns to trueLociLOD
     trueLociLOD[["locusID_leaf_feng"]] <- NA
@@ -152,7 +158,10 @@ add_to_trueLociLOD <- function(gene_info = leaf_feng, trueLociLOD = trueLociLOD)
             trueLociLOD_res[["locusID_leaf_feng"]][ind] <- 
                 unique(gene_info_loci[["unique_loci"]])
             trueLociLOD_res[["bestSNP_lod_leaf_feng"]][ind] <-
-                unique(gene_info_loci[["best_SNP_lod"]])
+                max(loci_info[
+                    loci_info[["locusID"]] %in% unique(gene_info_loci[["locusID"]]) &
+                    loci_info[["Peak.ID"]] %in% features_i_j, "lod"])
+                ##unique(gene_info_loci[["best_SNP_lod"]])
             trueLociLOD_res[["locus_tag_leaf_feng"]][ind] <-
                 paste(gene_info_loci[["locus_tag"]][1], 
                     gene_info_loci[["locus_tag"]][nrow(gene_info_loci)], 
@@ -169,9 +178,9 @@ add_to_trueLociLOD <- function(gene_info = leaf_feng, trueLociLOD = trueLociLOD)
 
 ## apply the function on leaf_feng_normalized and leaf_feng_batch
 trueLociLOD_normalized <- add_to_trueLociLOD(gene_info = leaf_feng_normalized, 
-    trueLociLOD = trueLociLOD)
+    loci_info = leaf_feng_normalized_loci_info, trueLociLOD = trueLociLOD)
 trueLociLOD_batch <- add_to_trueLociLOD(gene_info = leaf_feng_batch, 
-    trueLociLOD = trueLociLOD)
+    loci_info = leaf_feng_batch_loci_info, trueLociLOD = trueLociLOD)
 
 
 write.table(trueLociLOD_normalized, 
