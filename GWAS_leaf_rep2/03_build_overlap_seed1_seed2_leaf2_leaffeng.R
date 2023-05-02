@@ -162,12 +162,6 @@ add_to_trueLociLOD <- function(gene_info = leaf_feng, loci_info = leaf_feng_loci
                     loci_info[["locusID"]] %in% unique(gene_info_loci[["locusID"]]) &
                     loci_info[["Peak.ID"]] %in% paste0("MLM.", features_i_j), "lod"], 
                 na.rm = TRUE)
-            #if (trueLociLOD_res[["bestSNP_lod_leaf_feng"]][ind] == -Inf) {
-            #    print(features_i_j)
-            #    print(i)
-            #    stop("stop")
-            #}
-            
                 ##unique(gene_info_loci[["best_SNP_lod"]])
             trueLociLOD_res[["locus_tag_leaf_feng"]][ind] <-
                 paste(gene_info_loci[["locus_tag"]][1], 
