@@ -1,5 +1,7 @@
 library(ggplot2)
+library(ggpubr)
 library(dplyr)
+library(ComplexHeatmap)
 setwd("~/GitHub/GWAS_arabidopsis_seed/overlap_loci")
 
 ################################################################################
@@ -16,6 +18,31 @@ map_neg <- read.table(
 rel_rep1 <- read.csv("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/rep1_negative_match.csv", sep = "\t")
 rel_rep2 <- read.csv("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/rep2_negative_match.csv", sep = "\t")
 rel_rep_feng <- read.csv("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/rep_feng_negative_match.csv", sep = "\t")
+
+## the map_neg will now be truncated such that they only contain the mass
+## features mapped between the three datasets
+mapping_rep1_rep2 <- strsplit(rel_rep2[, "mapping_rep1_rep2"], split = "/")
+mapping_df <- data.frame(
+    rep1 = unlist(lapply(mapping_rep1_rep2, "[", 1)),
+    rep2 = unlist(lapply(mapping_rep1_rep2, "[", 2))
+)
+mapping_rep2_rep_feng <- strsplit(rel_rep_feng[, "mapping_rep2_rep_feng"], 
+    split = "/")
+mapping_df_all <- data.frame(
+    rep2 = unlist(lapply(mapping_rep2_rep_feng,"[", 1)),
+    rep_feng = unlist(lapply(mapping_rep2_rep_feng, "[", 2))
+)
+mapping_df_all <- dplyr::inner_join(mapping_df, mapping_df_all, 
+    by = "rep2", multiple = "all")
+#mapping_df_all <- mapping_df_all[!duplicated(
+#    paste(mapping_df_all$rep1, mapping_df_all$rep2, mapping_df_all$rep_feng)), ]
+
+## truncate map_neg
+map_neg <- map_neg |> 
+    dplyr::filter(met_rep1 %in% mapping_df_all$rep1 | is.na(met_rep1)) |>
+    dplyr::filter(met_rep2 %in% mapping_df_all$rep2 | is.na(met_rep2)) |>
+    dplyr::filter(met_leaf_feng %in% mapping_df_all$rep_feng | is.na(met_leaf_feng))
+
 
 ################################################################################
 ## Correlation plots of LOD values
@@ -57,7 +84,7 @@ p_s1l2_neg <- qplot(x, y, data = data.frame(x = x, y = y), alpha = .05) +
     scale_x_continuous(limits = c(5.0, 40)) + 
     scale_y_continuous(limits = c(5.0, 40)) + 
     geom_rug(col = rgb(.5, 0, 0), alpha = 0.03) + 
-    xlab("highest LOD, seed (repl. 1)") + ylab("highest LOD, leaf") +
+    xlab("highest LOD, seed (repl. 1)") + ylab("highest LOD, leaf \n(Wu et al., 2018)") +
     ggtitle(bquote(rho == .(paste(round(cor_test$estimate[[1]], 3))))) +
     coord_fixed() + theme_bw() +
     theme(legend.position = "none", axis.title = element_text(size = 8), 
@@ -103,7 +130,7 @@ p_s2l2_neg <- qplot(x, y, data = data.frame(x = x, y = y), alpha = .05) +
     scale_x_continuous(limits = c(5.0, 40)) + 
     scale_y_continuous(limits = c(5.0, 40)) + 
     geom_rug(col = rgb(.5, 0, 0), alpha = 0.03) + 
-    xlab("highest LOD, seed (repl. 2)") + ylab("highest LOD, leaf") +
+    xlab("highest LOD, seed (repl. 2)") + ylab("highest LOD, leaf \n(Wu et al., 2018)") +
     ggtitle(bquote(rho == .(paste(round(cor_test$estimate[[1]], 3))))) +
     coord_fixed() + theme_bw() +
     theme(legend.position = "none", axis.title = element_text(size = 8), 
@@ -149,7 +176,7 @@ p_s2l2_neg <- qplot(x, y, data = data.frame(x = x, y = y), alpha = .05) +
     scale_x_continuous(limits = c(5.0, 40)) + 
     scale_y_continuous(limits = c(5.0, 40)) + 
     geom_rug(col = rgb(.5, 0, 0), alpha = 0.03) + 
-    xlab("highest LOD, seed (repl. 2)") + ylab("highest LOD, leaf") +
+    xlab("highest LOD, seed (repl. 2)") + ylab("highest LOD, leaf \n(Wu et al., 2018)") +
     ggtitle(bquote(rho == .(paste(round(cor_test$estimate[[1]], 3))))) +
     coord_fixed() + theme_bw() + 
     theme(legend.position = "none", axis.title = element_text(size = 8), 
@@ -172,7 +199,7 @@ p_l2lz_neg <- qplot(x, y, data = data.frame(x = x, y = y), alpha = .05) +
     scale_x_continuous(limits = c(5.0, 40)) + 
     scale_y_continuous(limits = c(5.0, 40)) + 
     geom_rug(col = rgb(.5, 0, 0), alpha = 0.03) + 
-    xlab("highest LOD, leaf") + ylab("highest LOD, leaf \n(Zhu et al., 2022)") +
+    xlab("highest LOD, leaf \n(Wu et al., 2018)") + ylab("highest LOD, leaf \n(Zhu et al., 2022)") +
     ggtitle(bquote(rho == .(paste(round(cor_test$estimate[[1]], 3))))) +
     coord_fixed() + theme_bw() +
     theme(legend.position = "none", axis.title = element_text(size = 8), 
@@ -184,44 +211,13 @@ ggsave(p_l2lz_neg, file = "plot_neg_leaf2_leaf_zhu_scatter.pdf", device = "pdf",
 
 ################################################################################
 ## UpSetR
-library(UpSetR)
 
 ## negative
-## the map_neg will now be truncated such that they only contain the mass
-## features of the core set
-mapping_rep1_rep2 <- strsplit(rel_rep2[, "mapping_rep1_rep2"], split = "/")
-mapping_df <- data.frame(
-    rep1 = unlist(lapply(mapping_rep1_rep2, "[", 1)),
-    rep2 = unlist(lapply(mapping_rep1_rep2, "[", 2))
-)
-mapping_rep2_rep_feng <- strsplit(rel_rep_feng[, "mapping_rep2_rep_feng"], 
-                                  split = "/")
-mapping_df_tmp <- data.frame(
-    rep2 = unlist(lapply(mapping_rep2_rep_feng,"[", 1)),
-    rep_feng = unlist(lapply(mapping_rep2_rep_feng, "[", 2))
-)
-mapping_df_all <- dplyr::inner_join(mapping_df, mapping_df_tmp, 
-                                    by = "rep2", multiple = "all")
-mapping_df_all <- mapping_df_all[!duplicated(
-    paste(mapping_df_all$rep1, mapping_df_all$rep2, mapping_df_all$rep_feng)), ]
 
 ## create the UpSet plots
 
-## first create binary matrices, fill the entries if 1 to the number of 
+## first create binary matrix, fill the entries if 1 to the number of 
 ## row to mimic unique names
-
-## original file
-# cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2", 
-#     "locus_tag_leaf_feng", "met_rep1", "met_rep2")
-# binary_mat <- map_neg |>
-#     dplyr::filter(met_rep1 %in% mapping_df$rep1) |>
-#     dplyr::filter(met_rep2 %in% mapping_df$rep2) |>
-#     
-#     dplyr::select(all_of(cols))
-# binary_mat[, 1:4] <- ifelse(is.na(binary_mat[, 1:4]) | binary_mat[, 1:4] == "", 0, 1) |>
-#     as.data.frame()
-
-## for normalized
 cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2",
           "locus_tag_leaf_feng", "met_rep1", "met_rep2", "met_leaf_feng")
 binary_mat <- map_neg |>
@@ -235,25 +231,10 @@ binary_mat <- map_neg |>
 binary_mat[, 1:4] <- ifelse(
     is.na(binary_mat[, 1:4]) | binary_mat[, 1:4] == "", 0, 1) |>
     as.data.frame()
-# 
-# ## for batch
-# cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2", 
-#           "locus_tag_leaf_feng", "met_rep1", "met_rep2")
-# binary_mat_batch <- trueLociLOD_batch |>
-#     dplyr::filter(
-#         met_rep1 %in% mapping_df_all$rep1 | is.na(met_rep1)) |>
-#     dplyr::filter(
-#         met_rep2 %in% mapping_df_all$rep2 | is.na(met_rep2)) |>
-#     dplyr::filter(
-#         met_leaf_feng %in% mapping_df_all$rep_feng | is.na(met_leaf_feng)) |>
-#     dplyr::select(all_of(cols))
-# binary_mat_batch[, 1:4] <- ifelse(
-#     is.na(binary_mat_batch[, 1:4]) | binary_mat_batch[, 1:4] == "", 0, 1) |>
-#     as.data.frame()
 
 ## do the actual plotting
 binary_mat_upset <- binary_mat
-colnames(binary_mat_upset)[1:4] <- c("seed \n (repl. 1)", "seed \n (repl. 2)", "leaf", "leaf \n (Zhu et al., 2022)")
+colnames(binary_mat_upset)[1:4] <- c("seed \n (repl. 1)", "seed \n (repl. 2)", "leaf \n (Wu et al., 2018)", "leaf \n (Zhu et al., 2022)")
 m <- ComplexHeatmap::make_comb_mat(binary_mat_upset[, 1:4], mode = "distinct")
 
 p_upset_neg <- ComplexHeatmap::UpSet(m = m, 
@@ -265,8 +246,8 @@ p_upset_neg <- ComplexHeatmap::UpSet(m = m,
 
 
 ## arrange in one plot
-p_1 <- ggarrange(p_s1s2_neg, p_l2lz_neg, p_s2l2_neg, 
-    p_s1lz_neg, p_s1l2_neg, p_s2lz_neg,
+p_1 <- ggarrange(p_s1s2_neg, p_s1l2_neg, p_s2l2_neg,  
+    p_l2lz_neg, p_s1lz_neg, p_s2lz_neg,
     ncol = 3, nrow = 2, labels = "AUTO")
 p_2 <- ggarrange(grid::grid.grabExpr(ComplexHeatmap::draw(p_upset_neg)), ncol = 1, nrow = 1, labels = "H")
 
@@ -298,9 +279,10 @@ plot_loci_distribution <- function(binary_mat = binary_mat,
                 binary_mat[, "locus_tag_seed2"] == s2 & 
                 binary_mat[, "locus_tag_leaf2"] == l2), "met"]))
     }
+    
     p <- ggplot(df, aes(x = values.Freq)) + 
-        geom_bar(aes(y = (after_stat(count)) / sum(after_stat(count)))) + 
-        ylim(c(0, 1)) +xlim(c(0, 75)) + 
+        geom_bar(aes(y = 100 * (after_stat(count)) / sum(after_stat(count)) )) + 
+        ylim(c(0, 100)) +xlim(c(0, 75)) + 
         xlab("") + ylab("") +
         theme_bw()
     ggsave(p, file = file, device = "pdf", useDingbats = FALSE)
@@ -392,6 +374,22 @@ rel_rep1 <- read.csv("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/rep1_positiv
 rel_rep2 <- read.csv("~/GitHub/GWAS_arabidopsis_seed/GWAS_leaf_rep2/rep2_positive_match.csv", sep = "\t")
 
 
+
+
+## the trueLociLOD will now be truncated such that they only contain the mass
+## features mapped between the data sets
+mapping_rep1_rep2 <- strsplit(rel_rep2[, "mapping_rep1_rep2"], split = "/")
+mapping_df_all <- data.frame(
+    rep1 = unlist(lapply(mapping_rep1_rep2, "[", 1)),
+    rep2 = unlist(lapply(mapping_rep1_rep2, "[", 2))
+)
+
+
+## truncate map_neg
+map_pos <- map_pos |> 
+    dplyr::filter(met_rep1 %in% mapping_df_all$rep1 | is.na(met_rep1)) |>
+    dplyr::filter(met_rep2 %in% mapping_df_all$rep2 | is.na(met_rep2))
+
 ################################################################################
 ## Correlation plots of LOD values
 
@@ -435,7 +433,7 @@ p_s1l2_pos <- qplot(x, y, data = data.frame(x = x, y = y), alpha = .05) +
     scale_x_continuous(limits = c(5.0, 40)) + 
     scale_y_continuous(limits = c(5.0, 40)) + 
     geom_rug(col = rgb(.5, 0, 0), alpha = 0.03) + 
-    xlab("highest LOD, seed (repl. 1)") + ylab("highest LOD, leaf") +
+    xlab("highest LOD, seed (repl. 1)") + ylab("highest LOD, leaf \n(Wu et al., 2018)") +
     ggtitle(bquote(rho == .(paste(round(cor_test$estimate[[1]], 3))))) +
     coord_fixed() + theme_bw() + 
     theme(legend.position = "none", axis.title = element_text(size = 8), 
@@ -459,7 +457,7 @@ p_s2l2_pos <- qplot(x, y, data = data.frame(x = x, y = y), alpha = .05) +
     scale_x_continuous(limits = c(5.0, 40)) + 
     scale_y_continuous(limits = c(5.0, 40)) + 
     geom_rug(col = rgb(.5, 0, 0), alpha = 0.03) + 
-    xlab("highest LOD, seed (repl. 2)") + ylab("highest LOD, leaf") +
+    xlab("highest LOD, seed (repl. 2)") + ylab("highest LOD, leaf \n(Wu et al., 2018)") +
     ggtitle(bquote(rho == .(paste(round(cor_test$estimate[[1]], 3))))) +
     coord_fixed() + theme_bw() + 
     theme(legend.position = "none", axis.title = element_text(size = 8), 
@@ -470,17 +468,8 @@ ggsave(p_s2l2_pos, file = "plot_pos_seed2_leaf2_scatter.pdf", device = "pdf",
 ################################################################################
 
 ## UpSetR
-library(UpSetR)
 
 ## positive
-## the trueLociLOD will now be truncated such that they only contain the mass
-## features of the core set
-mapping_rep1_rep2 <- strsplit(rel_rep2[, "mapping_rep1_rep2"], split = "/")
-mapping_df_all <- data.frame(
-    rep1 = unlist(lapply(mapping_rep1_rep2, "[", 1)),
-    rep2 = unlist(lapply(mapping_rep1_rep2, "[", 2))
-)
-
 ## create the UpSet plots
 
 ## first create binary matrices, fill the entries if 1 to the number of 
@@ -490,15 +479,15 @@ mapping_df_all <- data.frame(
 cols <- c("locus_tag_seed1", "locus_tag_seed2", "locus_tag_leaf2", 
     "met_rep1", "met_rep2")
 binary_mat <- map_pos |>
-    dplyr::filter(met_rep1 %in% mapping_df$rep1) |>
-    dplyr::filter(met_rep2 %in% mapping_df$rep2) |>
+    # dplyr::filter(met_rep1 %in% mapping_df$rep1) |>
+    # dplyr::filter(met_rep2 %in% mapping_df$rep2) |>
     dplyr::select(all_of(cols))
 binary_mat[, 1:3] <- ifelse(is.na(binary_mat[, 1:3]) | binary_mat[, 1:3] == "", 0, 1) |>
     as.data.frame()
 
 ## do the actual plotting
 binary_mat_upset <- binary_mat
-colnames(binary_mat_upset)[1:3] <- c("seed \n (repl. 1)", "seed \n (repl. 2)", "leaf")
+colnames(binary_mat_upset)[1:3] <- c("seed \n (repl. 1)", "seed \n (repl. 2)", "leaf \n (Wu et al., 2018)")
 m <- ComplexHeatmap::make_comb_mat(binary_mat_upset[, 1:3], mode = "distinct")
 
 p_upset_pos <- ComplexHeatmap::UpSet(m = m, 
@@ -509,7 +498,7 @@ p_upset_pos <- ComplexHeatmap::UpSet(m = m,
     column_names_max_height = unit(1, "cm"))
 
 ## arrange in one plot
-p_1 <- ggarrange(p_s1s2_pos, p_s1l2_pos, p_s2l2_pos,
+p_1 <- ggarrange(p_s1s2_pos, p_s2l2_pos, p_s1l2_pos,
     ncol = 3, nrow = 1, labels = "AUTO")
 p_2 <- ggarrange(grid::grid.grabExpr(ComplexHeatmap::draw(p_upset_pos)), 
     ncol = 1, nrow = 1, labels = "D")
@@ -556,14 +545,19 @@ p_s1s2l2_pos <- plot_loci_distribution(binary_mat,
 
 
 ## create a plot with negative and positive mode
-
-p <- ggarrange(p_s1_neg, p_s2_neg, p_l2_neg, p_lz_neg, p_s1s2_neg, p_s1l2_neg,
+p_neg <- ggarrange(p_s1_neg, p_s2_neg, p_l2_neg, p_lz_neg, p_s1s2_neg, p_s1l2_neg,
           p_s1lz_neg, p_s2l2_neg, p_s2lz_neg, p_s1s2l2_neg, p_s1s2lz_neg,
           p_s1l2lz_neg, p_s2l2lz_neg, p_s1s2l2lz_neg, 
-          
-          p_s1_pos, p_s2_pos, p_l2_pos, p_s1s2_pos, p_s1l2_pos, p_s2l2_pos,
-          p_s1s2l2_pos,
-          nrow = 7, ncol = 3, label = "AUTO")
+          nrow = 7, ncol = 2, 
+          labels = c("A", "B", "D", "E", "G", "H", "J", "K", "M", "N", "P", "Q", "S", "T"))
+p_neg <- annotate_figure(p_neg, top = "negative ionization mode", 
+    left = "proportion to total # of mapped loci [%]")    
 
+p_pos <- ggarrange(p_s1_pos, p_s2_pos, p_l2_pos, p_s1s2_pos, p_s1l2_pos, p_s2l2_pos,
+                   p_s1s2l2_pos, nrow = 7, ncol = 1,
+                   labels = c("C", "F", "I", "L", "O", "R", "U"))
+p_pos <- annotate_figure(p_pos, top = "positive ionization mode")
 
-
+p <- ggarrange(p_neg, p_pos, ncol = 2, nrow = 1, widths = c(2, 1))
+p <- annotate_figure(p, bottom = "# loci")
+ggsave(p, file = "figure_proportion_to_total_loci.pdf", device = "pdf", unit = "mm", width = 210, height = 297)
