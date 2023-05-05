@@ -551,12 +551,13 @@ p_neg <- ggarrange(p_s1_neg, p_s2_neg, p_l2_neg, p_lz_neg, p_s1s2_neg, p_s1l2_ne
           nrow = 7, ncol = 2, 
           labels = c("A", "B", "D", "E", "G", "H", "J", "K", "M", "N", "P", "Q", "S", "T"))
 p_neg <- annotate_figure(p_neg, top = "negative ionization mode", 
-    left = "proportion to total # of mapped loci [%]")    
+    left = "proportion to total # of mapped loci [%]")
 
 p_pos <- ggarrange(p_s1_pos, p_s2_pos, p_l2_pos, p_s1s2_pos, p_s1l2_pos, p_s2l2_pos,
                    p_s1s2l2_pos, nrow = 7, ncol = 1,
                    labels = c("C", "F", "I", "L", "O", "R", "U"))
 p_pos <- annotate_figure(p_pos, top = "positive ionization mode")
+
 
 p <- ggarrange(p_neg, p_pos, ncol = 2, nrow = 1, widths = c(2, 1))
 p <- annotate_figure(p, bottom = "# loci")
